@@ -403,7 +403,7 @@ tcp_listen_input(struct tcp_pcb_listen *pcb, tcp_in_data* in_data)
   	npcb->rcv_wnd_max = TCP_WND_SCALED(npcb);
   	npcb->rcv_wnd_max_desired = TCP_WND_SCALED(npcb);
 
-  	npcb->snd_wnd = SND_WND_SCALE(npcb, in_data->tcphdr->wnd);
+  	npcb->snd_wnd = in_data->tcphdr->wnd;
   	npcb->snd_wnd_max = npcb->snd_wnd;
   	npcb->ssthresh = npcb->snd_wnd;
 #if TCP_CALCULATE_EFF_SEND_MSS
@@ -546,7 +546,7 @@ tcp_process(struct tcp_pcb *pcb, tcp_in_data* in_data)
       pcb->rcv_nxt = in_data->seqno + 1;
       pcb->rcv_ann_right_edge = pcb->rcv_nxt;
       pcb->lastack = in_data->ackno;
-      pcb->snd_wnd = SND_WND_SCALE(pcb, in_data->tcphdr->wnd);        // Which means: tcphdr->wnd << pcb->snd_scale;
+      pcb->snd_wnd = in_data->tcphdr->wnd;
       pcb->snd_wnd_max = pcb->snd_wnd;
       pcb->snd_wl1 = in_data->seqno - 1; /* initialise to seqno - 1 to force window update */
       set_tcp_state(pcb, ESTABLISHED);
