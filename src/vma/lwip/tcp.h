@@ -260,8 +260,8 @@ extern tcp_state_observer_fn external_tcp_state_observer;
   u32_t rcv_wnd_max; /* maximum available receive window */ \
   u32_t rcv_wnd_max_desired;
 
-/** Initial CWND calculation as defined RFC 2581 */
-#define LWIP_TCP_CALC_INITIAL_CWND(mss) LWIP_MIN((4U * (mss)), LWIP_MAX((2U * (mss)), 4380U));
+/** Initial CWND calculation as defined RFC 6928 */
+#define LWIP_TCP_CALC_INITIAL_CWND(mss) LWIP_MIN((10U * (mss)), LWIP_MAX((2U * (mss)), 14600U));
 
 #define RCV_WND_SCALE(pcb, wnd) (((wnd) >> (pcb)->rcv_scale))
 #define SND_WND_SCALE(pcb, wnd) ((u32_t)(wnd) << (pcb)->snd_scale)
