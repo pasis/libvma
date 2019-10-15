@@ -1038,7 +1038,7 @@ void tcp_pcb_init (struct tcp_pcb* pcb, u8_t prio)
 	   initial advertised window is very small and then grows rapidly once the
 	   connection is established. To avoid these complications, we set ssthresh to the
 	   largest effective cwnd (amount of in-flight data) that the sender can have. */
-	pcb->ssthresh = TCP_SND_BUF;
+	pcb->ssthresh = 128 * 1024;
 
 #if TCP_CC_ALGO_MOD
 	switch (lwip_cc_algo_module) {
