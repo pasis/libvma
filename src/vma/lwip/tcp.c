@@ -616,7 +616,6 @@ tcp_connect(struct tcp_pcb *pcb, ip_addr_t *ipaddr, u16_t port,
   UPDATE_PCB_BY_MSS(pcb, eff_mss);
 #endif /* TCP_CALCULATE_EFF_SEND_MSS */
   pcb->cwnd = 1;
-  pcb->ssthresh = pcb->mss * 10;
   pcb->connected = connected;
 
   /* Send a SYN together with the MSS option. */
@@ -1032,6 +1031,15 @@ void tcp_pcb_init (struct tcp_pcb* pcb, u8_t prio)
 	pcb->sa = 0;
 	pcb->sv = 3000 / slow_tmr_interval;
 	pcb->rtime = -1;
+	pcb->cwnd = 1;
+	/* RFC 5681 recommends setting ssthresh abritrarily high and gives an example
+	   of using the largest advertised receive window.  We've seen complications with
+	   receiving TCPs that use window scaling and/or window auto-tuning where the
+	   initial advertised window is very small and then grows rapidly once the
+	   connection is established. To avoid these complications, we set ssthresh to the
+	   largest effective cwnd (amount of in-flight data) that the sender can have. */
+	pcb->ssthresh = TCP_SND_BUF;
+
 #if TCP_CC_ALGO_MOD
 	switch (lwip_cc_algo_module) {
 	case CC_MOD_CUBIC:
@@ -1047,7 +1055,6 @@ void tcp_pcb_init (struct tcp_pcb* pcb, u8_t prio)
 	}
 	cc_init(pcb);
 #endif
-	pcb->cwnd = 1;
 	iss = tcp_next_iss();
 	pcb->snd_wl2 = iss;
 	pcb->snd_nxt = iss;

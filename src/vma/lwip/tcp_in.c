@@ -405,7 +405,6 @@ tcp_listen_input(struct tcp_pcb_listen *pcb, tcp_in_data* in_data)
 
   	npcb->snd_wnd = in_data->tcphdr->wnd;
   	npcb->snd_wnd_max = npcb->snd_wnd;
-  	npcb->ssthresh = npcb->snd_wnd;
 #if TCP_CALCULATE_EFF_SEND_MSS
     u16_t snd_mss = tcp_eff_send_mss(npcb->mss, npcb);
     UPDATE_PCB_BY_MSS(npcb, snd_mss); 
@@ -556,13 +555,10 @@ tcp_process(struct tcp_pcb *pcb, tcp_in_data* in_data)
       UPDATE_PCB_BY_MSS(pcb, eff_mss);
 #endif /* TCP_CALCULATE_EFF_SEND_MSS */
 
-      /* Set ssthresh again after changing pcb->mss (already set in tcp_connect
-       * but for the default value of pcb->mss) */
-      pcb->ssthresh = pcb->mss * 10;
 #if TCP_CC_ALGO_MOD
       cc_conn_init(pcb);
 #else
-      pcb->cwnd = ((pcb->cwnd == 1) ? (pcb->mss * 2) : pcb->mss);
+      pcb->cwnd = LWIP_TCP_CALC_INITIAL_CWND(pcb->mss);
 #endif
       LWIP_ASSERT("pcb->snd_queuelen > 0", (pcb->snd_queuelen > 0));
       --pcb->snd_queuelen;
@@ -600,7 +596,6 @@ tcp_process(struct tcp_pcb *pcb, tcp_in_data* in_data)
     if (in_data->flags & TCP_ACK) {
       /* expected ACK number? */
       if (TCP_SEQ_BETWEEN(in_data->ackno, pcb->lastack+1, pcb->snd_nxt)) {
-        u32_t old_cwnd;
         set_tcp_state(pcb, ESTABLISHED);
         LWIP_DEBUGF(TCP_DEBUG, ("TCP connection established %"U16_F" -> %"U16_F".\n", in_data->inseg.tcphdr->src, in_data->inseg.tcphdr->dest));
 #if LWIP_CALLBACK_API
@@ -617,7 +612,6 @@ tcp_process(struct tcp_pcb *pcb, tcp_in_data* in_data)
           }
           return ERR_ABRT;
         }
-        old_cwnd = pcb->cwnd;
         /* If there was any data contained within this ACK,
          * we'd better pass it on to the application as well. */
         tcp_receive(pcb, in_data);
@@ -627,10 +621,9 @@ tcp_process(struct tcp_pcb *pcb, tcp_in_data* in_data)
           pcb->acked--;
         }
 #if TCP_CC_ALGO_MOD
-        pcb->cwnd = old_cwnd;
         cc_conn_init(pcb);
 #else
-        pcb->cwnd = ((old_cwnd == 1) ? (pcb->mss * 2) : pcb->mss);
+        pcb->cwnd = LWIP_TCP_CALC_INITIAL_CWND(pcb->mss);
 #endif
         if (in_data->recv_flags & TF_GOT_FIN) {
           tcp_ack_now(pcb);
