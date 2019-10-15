@@ -1027,9 +1027,9 @@ void tcp_pcb_init (struct tcp_pcb* pcb, u8_t prio)
 	u16_t snd_mss = pcb->advtsd_mss = (LWIP_TCP_MSS) ? ((LWIP_TCP_MSS > 536) ? 536 : LWIP_TCP_MSS) : 536;
 	UPDATE_PCB_BY_MSS(pcb, snd_mss);
 	pcb->max_unsent_len = pcb->max_tcp_snd_queuelen;
-	pcb->rto = 3000 / slow_tmr_interval;
+	pcb->rto = 1000 / slow_tmr_interval;
 	pcb->sa = 0;
-	pcb->sv = 3000 / slow_tmr_interval;
+	pcb->sv = 1000 / slow_tmr_interval;
 	pcb->rtime = -1;
 	pcb->cwnd = 1;
 	/* RFC 5681 recommends setting ssthresh abritrarily high and gives an example
