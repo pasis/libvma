@@ -130,11 +130,14 @@ static void
 lwip_cong_signal(struct tcp_pcb *pcb, uint32_t type)
 {
 	/* Set ssthresh to half of the minimum of the current
-	 * cwnd and the advertised window */
-	if (pcb->cwnd > pcb->snd_wnd) {
-		pcb->ssthresh = pcb->snd_wnd / 2;
-	} else {
-		pcb->ssthresh = pcb->cwnd / 2;
+	 * cwnd and the advertised window. Minimum of the two windows
+	 * is an approximation of the FlightSize. */
+	if (pcb->nrtx == 0) {
+		if (pcb->cwnd > pcb->snd_wnd) {
+			pcb->ssthresh = pcb->snd_wnd / 2;
+		} else {
+			pcb->ssthresh = pcb->cwnd / 2;
+		}
 	}
 
 	/* The minimum value for ssthresh should be 2 MSS */

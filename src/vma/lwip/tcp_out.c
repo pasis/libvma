@@ -1874,7 +1874,6 @@ tcp_rexmit_fast(struct tcp_pcb *pcb)
                  "), fast retransmit %"U32_F"\n",
                  (u16_t)pcb->dupacks, pcb->lastack,
                  pcb->unacked->seqno));
-    tcp_rexmit(pcb);
 #if TCP_CC_ALGO_MOD
     cc_cong_signal(pcb, CC_NDUPACK);
 #else
@@ -1897,6 +1896,7 @@ tcp_rexmit_fast(struct tcp_pcb *pcb)
 
     pcb->cwnd = pcb->ssthresh + 3 * pcb->mss;
 #endif
+    tcp_rexmit(pcb);
     pcb->flags |= TF_INFR;
   } 
 }
