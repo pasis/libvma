@@ -337,6 +337,7 @@ struct tcp_pcb {
 #endif
   u32_t cwnd;
   u32_t ssthresh;
+  u32_t recover; /* RFC6582 */
 
   /* sender variables */
   u32_t snd_nxt;   /* next new seqno to be sent */

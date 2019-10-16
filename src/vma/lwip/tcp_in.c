@@ -888,6 +888,7 @@ tcp_receive(struct tcp_pcb *pcb, tcp_in_data* in_data)
   u16_t new_tot_len;
   int found_dupack = 0;
   s8_t persist = 0;
+  int still_infr = 0;
 
   if (in_data->flags & TCP_ACK) {
     right_wnd_edge = pcb->snd_wnd + pcb->snd_wl2;
@@ -970,6 +971,7 @@ tcp_receive(struct tcp_pcb *pcb, tcp_in_data* in_data)
 #endif //TCP_CC_ALGO_MOD
               } else if (pcb->dupacks == 3) {
                 /* Do fast retransmit */
+                pcb->recover = pcb->snd_nxt;
                 tcp_rexmit_fast(pcb);
 #if TCP_CC_ALGO_MOD
                 cc_ack_received(pcb, 0);
@@ -992,12 +994,16 @@ tcp_receive(struct tcp_pcb *pcb, tcp_in_data* in_data)
          in fast retransmit. Also reset the congestion window to the
          slow start threshold. */
       if (pcb->flags & TF_INFR) {
+        if (TCP_SEQ_GEQ(in_data->ackno, pcb->recover)) {
 #if TCP_CC_ALGO_MOD
-	cc_post_recovery(pcb);
+	  cc_post_recovery(pcb);
 #else
-        pcb->cwnd = pcb->ssthresh;
+          pcb->cwnd = pcb->ssthresh;
 #endif
-        pcb->flags &= ~TF_INFR;
+          pcb->flags &= ~TF_INFR;
+        } else {
+          still_infr = 1;
+        }
       }
 
       /* Reset the number of retransmissions. */
@@ -1017,7 +1023,7 @@ tcp_receive(struct tcp_pcb *pcb, tcp_in_data* in_data)
 
       /* Update the congestion control variables (cwnd and
          ssthresh). */
-      if (get_tcp_state(pcb) >= ESTABLISHED) {
+      if (!still_infr && get_tcp_state(pcb) >= ESTABLISHED) {
 #if TCP_CC_ALGO_MOD
 	 cc_ack_received(pcb, CC_ACK);
 #else
@@ -1170,6 +1176,16 @@ tcp_receive(struct tcp_pcb *pcb, tcp_in_data* in_data)
 
       pcb->rttest = 0;
     }
+  }
+
+  if (still_infr) {
+    /* TODO signal cc module with a partial ACK. */
+    pcb->cwnd += LWIP_MIN(pcb->acked, pcb->mss);
+    /* Clear the flag or the following function exits immediately. */
+    pcb->flags &= ~TF_INFR;
+    tcp_rexmit_fast(pcb);
+    /* We need to inflate cwnd with every next DUP ACK. */
+    pcb->dupacks = 3;
   }
 
   /* If the incoming segment contains data, we must process it

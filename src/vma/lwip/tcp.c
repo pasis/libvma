@@ -692,6 +692,8 @@ tcp_slowtmr(struct tcp_pcb* pcb)
 		  ++pcb->rtime;
 
 		if (pcb->unacked != NULL && pcb->rtime >= pcb->rto) {
+                  /* RFC6582: fast recovery ... ends when either a retransmission timeout occurs ... */
+                  pcb->flags &= ~TF_INFR;
 		  /* Time for a retransmission. */
 		  LWIP_DEBUGF(TCP_RTO_DEBUG, ("tcp_slowtmr: rtime %"S16_F
 									  " pcb->rto %"S16_F"\n",
