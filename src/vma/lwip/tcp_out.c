@@ -509,6 +509,13 @@ tcp_write(struct tcp_pcb *pcb, const void *arg, u32_t len, u8_t is_dummy)
      * The number of bytes copied is recorded in the oversize_used
      * variable. The actual copying is done at the bottom of the
      * function.
+     *
+     * Don't extend a segment which is queued for retransmission. We want
+     * to retransmit segments in their original form. Retransmitted segments
+     * can be distinguished by the following criteria:
+     *     seg->seqno < pcb->snd_nxt
+     * Therefore, we can extend a segment for which the criteria applies:
+     *     seg->seqno >= pcb->snd_nxt
      */
 #if TCP_OVERSIZE
 #if TCP_OVERSIZE_DBGCHECK
@@ -517,7 +524,8 @@ tcp_write(struct tcp_pcb *pcb, const void *arg, u32_t len, u8_t is_dummy)
                 pcb->unsent_oversize == pcb->last_unsent->oversize_left);
 #endif /* TCP_OVERSIZE_DBGCHECK */
     oversize = pcb->unsent_oversize;
-    if (oversize > 0) {
+    if ((oversize > 0) &&
+        (TCP_SEQ_GEQ(pcb->last_unsent->seqno, pcb->snd_nxt))) {
       LWIP_ASSERT("inconsistent oversize vs. space", oversize_used <= space);
 #if LWIP_TSO
 #else
@@ -538,12 +546,16 @@ tcp_write(struct tcp_pcb *pcb, const void *arg, u32_t len, u8_t is_dummy)
      * We don't extend segments containing SYN/FIN flags or options
      * (len==0). The new pbuf is kept in concat_p and pbuf_cat'ed at
      * the end.
+     *
+     * Similarly to phase 1, don't extend a retransmitted segment.
      */
 #if LWIP_TSO
     if ((pos < len) && (space > 0) && (pcb->last_unsent->len > 0) &&
-        (tot_p < (int)pcb->tso.max_send_sge)) {
+        (tot_p < (int)pcb->tso.max_send_sge) &&
+        (TCP_SEQ_GEQ(pcb->last_unsent->seqno, pcb->snd_nxt))) {
 #else
-    if ((pos < len) && (space > 0) && (pcb->last_unsent->len > 0)) {
+    if ((pos < len) && (space > 0) && (pcb->last_unsent->len > 0) &&
+        (TCP_SEQ_GEQ(pcb->last_unsent->seqno, pcb->snd_nxt))) {
 #endif /* LWIP_TSO */
 
       u16_t seglen = space < len - pos ? space : len - pos;
