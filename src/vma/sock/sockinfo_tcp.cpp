@@ -3793,6 +3793,7 @@ int sockinfo_tcp::setsockopt(int __level, int __optname,
 int sockinfo_tcp::getsockopt_offload(int __level, int __optname, void *__optval,
 					socklen_t *__optlen)
 {
+	struct tcp_info *ti;
 	int ret = -1;
 
 	if (!__optval || !__optlen) {
@@ -3820,6 +3821,20 @@ int sockinfo_tcp::getsockopt_offload(int __level, int __optname, void *__optval,
 			if (*__optlen >= sizeof(int)) {
 				*(int *)__optval = m_pcb.quickack;
 				si_tcp_logdbg("(TCP_QUICKACK) value: %d", *(int *)__optval);
+				ret = 0;
+			} else {
+				errno = EINVAL;
+			}
+			break;
+		case TCP_INFO:
+			ti = (struct tcp_info *)__optval;
+			if (*__optlen >= sizeof *ti) {
+				*__optlen = sizeof *ti;
+				memset(ti, 0, sizeof *ti);
+				ti->tcpi_snd_cwnd = m_pcb.cwnd / m_pcb.mss;
+				ti->tcpi_snd_ssthresh = m_pcb.ssthresh / m_pcb.mss;
+				ti->tcpi_total_retrans = m_p_socket_stats->counters.n_tx_retransmits;
+				ti->tcpi_snd_mss = m_pcb.mss;
 				ret = 0;
 			} else {
 				errno = EINVAL;
