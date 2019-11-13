@@ -38,6 +38,7 @@
 
 #include "vma/lwip/pbuf.h"
 #include "vma/lwip/ip.h"
+#include "vma/lwip/stats.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -292,6 +293,8 @@ struct tcp_pcb {
 #define TF_NODELAY     ((u16_t)0x0040U)   /* Disable Nagle algorithm */
 #define TF_NAGLEMEMERR ((u16_t)0x0080U)   /* nagle enabled, memerr, try to output to prevent delayed ACK to happen */
 #define TF_WND_SCALE   ((u16_t)0x0100U) /* Window Scale option enabled */
+
+  struct tcp_stats stats;
 
   /* the rest of the fields are in host byte order
      as we have to do some math with them */

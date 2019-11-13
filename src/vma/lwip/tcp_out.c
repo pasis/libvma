@@ -1417,6 +1417,15 @@ tcp_output(struct tcp_pcb *pcb)
      ", wnd %"U32_F"\n",pcb->snd_wnd, pcb->cwnd, wnd ));
   seg = pcb->unsent;
 
+  if (seg == NULL)
+    PCB_STATS_INC(n_underruns);
+  else if (seg->seqno - pcb->lastack + seg->len > wnd) {
+    if (wnd == pcb->snd_wnd)
+      PCB_STATS_INC(n_blocked_rwnd);
+    else
+      PCB_STATS_INC(n_blocked_cwnd);
+  }
+
   /* If the TF_ACK_NOW flag is set and no data will be sent (either
   * because the ->unsent queue is empty or because the window does
   * not allow it), construct an empty ACK segment and send it.
@@ -1764,6 +1773,7 @@ tcp_rst(u32_t seqno, u32_t ackno, u16_t local_port, u16_t remote_port, struct tc
   tcphdr->urgp = 0;
 
   TCP_STATS_INC(tcp.xmit);
+  PCB_STATS_INC(n_rst);
    /* Send output with hardcoded TTL since we have no access to the pcb */
 #if LWIP_TSO
   if(pcb) pcb->ip_output(p, pcb, 0);
@@ -1792,7 +1802,8 @@ tcp_rexmit_rto(struct tcp_pcb *pcb)
   }
 
   /* Move all unacked segments to the head of the unsent queue */
-  for (seg = pcb->unacked; seg->next != NULL; seg = seg->next);
+  for (seg = pcb->unacked; seg->next != NULL; seg = seg->next)
+    PCB_STATS_INC(n_rtx_rto); /* XXX may be less than this value! */
   /* concatenate unsent queue after unacked queue */
   seg->next = pcb->unsent;
 #if TCP_OVERSIZE && TCP_OVERSIZE_DBGCHECK
@@ -1808,6 +1819,7 @@ tcp_rexmit_rto(struct tcp_pcb *pcb)
 
   /* increment number of retransmissions */
   ++pcb->nrtx;
+  PCB_STATS_INC(n_rto);
 
   /* Don't take any RTT measurements after retransmitting. */
   pcb->rttest = 0;
@@ -1853,6 +1865,7 @@ tcp_rexmit(struct tcp_pcb *pcb)
 #endif /* TCP_OVERSIZE */
 
   ++pcb->nrtx;
+  PCB_STATS_INC(n_rtx_fast);
 
   /* Don't take any rtt measurements after retransmitting. */
   pcb->rttest = 0;
