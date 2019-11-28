@@ -210,6 +210,7 @@ tcp_create_segment(struct tcp_pcb *pcb, struct pbuf *p, u8_t flags, u32_t seqno,
     if ((seg = external_tcp_seg_alloc(pcb)) == NULL) {
       LWIP_DEBUGF(TCP_OUTPUT_DEBUG | 2, ("tcp_create_segment: no memory.\n"));
       tcp_tx_pbuf_free(pcb, p);
+      PCB_STATS_INC(n_memerr_seg);
       return NULL;
     }
 
@@ -250,6 +251,7 @@ tcp_create_segment(struct tcp_pcb *pcb, struct pbuf *p, u8_t flags, u32_t seqno,
     LWIP_DEBUGF(TCP_OUTPUT_DEBUG | 2, ("tcp_create_segment: no room for TCP header in pbuf.\n"));
     TCP_STATS_INC(tcp.err);
     tcp_tx_seg_free(pcb, seg);
+    PCB_STATS_INC(n_memerr_seg);
     return NULL;
   }
   seg->tcphdr = (struct tcp_hdr *)seg->p->payload;

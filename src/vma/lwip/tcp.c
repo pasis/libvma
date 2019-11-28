@@ -1087,7 +1087,10 @@ tcp_tx_pbuf_alloc(struct tcp_pcb * pcb, u16_t length, pbuf_type type)
 
 		// pbuf_alloc is not valid, we should allocate a new pbuf.
 		p = external_tcp_tx_pbuf_alloc(pcb);
-		if (!p) return NULL;
+		if (!p) {
+			PCB_STATS_INC(n_memerr_pbuf);
+			return NULL;
+		}
 
 		p->next = NULL;
 		p->type = type;

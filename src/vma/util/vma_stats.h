@@ -172,15 +172,17 @@ typedef struct {
 	uint32_t    n_tcp_recovered_fast;
 	uint32_t    n_tcp_dupacks;
 	uint32_t    n_tcp_ofo;
-	uint32_t    n_tcp_rx_ignored;
-	uint32_t    n_tcp_rx_dropped;
 	uint32_t    n_tcp_underruns;
 	uint32_t    n_tcp_blocked_cwnd;
 	uint32_t    n_tcp_blocked_rwnd;
 	uint32_t    n_tcp_blocked_sndbuf;
 	uint32_t    n_tcp_updates_rtt;
 	uint32_t    n_tcp_rst;
-	uint32_t    n_tcp_ecn;
+
+	uint32_t    n_tcp_rx_ignored;
+	uint32_t    n_tcp_rx_dropped;
+	uint32_t    n_tcp_memerr_pbuf;
+	uint32_t    n_tcp_memerr_seg;
 
 	uint32_t    n_ticks;
 	uint32_t    n_ticks_ss;

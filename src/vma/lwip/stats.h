@@ -119,14 +119,16 @@ struct tcp_stats {
   u32_t n_recovered_fast; /* recovered after fast retransmit without RTO */
   u32_t n_dupacks;        /* duplicate ACKs */
   u32_t n_ofo;            /* out of order segments */
-  u32_t n_ignored;        /* ignored segments */
-  u32_t n_dropped;        /* dropped segments due to an error */
   u32_t n_underruns;      /* underruns (no segments to send) */
   u32_t n_blocked_cwnd;   /* sending blocked by cwnd */
   u32_t n_blocked_rwnd;   /* sending blocked by rwnd */
   u32_t n_updates_rtt;    /* RTT measurements */
   u32_t n_rst;            /* RST segments */
-  u32_t n_ecn;            /* ECN packets */
+
+  u32_t n_ignored;        /* ignored incoming segments */
+  u32_t n_dropped;        /* dropped segments due to an error */
+  u32_t n_memerr_pbuf;    /* pbuf allocation errors */
+  u32_t n_memerr_seg;     /* segment allocation errors */
 };
 
 #ifdef NO_TCP_EXTRA_STATS

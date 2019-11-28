@@ -575,14 +575,16 @@ static void copy_tcp_stats(socket_stats_t *dst, struct tcp_stats *src)
 	dst->counters.n_tcp_recovered_fast =  src->n_recovered_fast;
 	dst->counters.n_tcp_dupacks = src->n_dupacks;
 	dst->counters.n_tcp_ofo = src->n_ofo;
-	dst->counters.n_tcp_rx_ignored = src->n_ignored;
-	dst->counters.n_tcp_rx_dropped = src->n_dropped;
 	dst->counters.n_tcp_underruns = src->n_underruns;
 	dst->counters.n_tcp_blocked_cwnd = src->n_blocked_cwnd;
 	dst->counters.n_tcp_blocked_rwnd = src->n_blocked_rwnd;
 	dst->counters.n_tcp_updates_rtt = src->n_updates_rtt;
 	dst->counters.n_tcp_rst = src->n_rst;
-	dst->counters.n_tcp_ecn = src->n_ecn;
+
+	dst->counters.n_tcp_rx_ignored = src->n_ignored;
+	dst->counters.n_tcp_rx_dropped = src->n_dropped;
+	dst->counters.n_tcp_memerr_pbuf = src->n_memerr_pbuf;
+	dst->counters.n_tcp_memerr_seg = src->n_memerr_seg;
 }
 
 static void copy_tcp_metrics(tcp_metrics_t *dst, struct tcp_pcb *pcb)
@@ -1155,6 +1157,8 @@ err_t sockinfo_tcp::ip_output(struct pbuf *p, void* v_p_conn, int is_rexmit, uin
 
 	if (is_rexmit) {
 		p_si_tcp->m_p_socket_stats->counters.n_tx_retransmits++;
+		if (p_si_tcp->m_pcb.cwnd < p_si_tcp->m_pcb.ssthresh)
+			p_si_tcp->m_p_socket_stats->counters.n_tcp_rtx_ss++;
 	}
 
 	return ERR_OK;

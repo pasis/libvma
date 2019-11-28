@@ -222,17 +222,19 @@ void update_delta_stat(socket_stats_t* p_curr_stat, socket_stats_t* p_prev_stat)
 	STAT_COUNTERS_DELTA(n_tcp_recovered_fast);
 	STAT_COUNTERS_DELTA(n_tcp_dupacks);
 	STAT_COUNTERS_DELTA(n_tcp_ofo);
-	STAT_COUNTERS_DELTA(n_tcp_rx_ignored);
-	STAT_COUNTERS_DELTA(n_tcp_rx_dropped);
 	STAT_COUNTERS_DELTA(n_tcp_underruns);
 	STAT_COUNTERS_DELTA(n_tcp_blocked_cwnd);
 	STAT_COUNTERS_DELTA(n_tcp_blocked_rwnd);
 	STAT_COUNTERS_DELTA(n_tcp_blocked_sndbuf);
 	STAT_COUNTERS_DELTA(n_tcp_updates_rtt);
 	STAT_COUNTERS_DELTA(n_tcp_rst);
-	STAT_COUNTERS_DELTA(n_tcp_ecn);
 	STAT_COUNTERS_DELTA(n_ticks);
 	STAT_COUNTERS_DELTA(n_ticks_ss);
+
+	STAT_COUNTERS_DELTA(n_tcp_rx_ignored);
+	STAT_COUNTERS_DELTA(n_tcp_rx_dropped);
+	STAT_COUNTERS_DELTA(n_tcp_memerr_pbuf);
+	STAT_COUNTERS_DELTA(n_tcp_memerr_seg);
 
 	p_prev_stat->tcp.n_tcp_mss = p_curr_stat->tcp.n_tcp_mss;
 	p_prev_stat->tcp.n_tcp_rto = p_curr_stat->tcp.n_tcp_rto;
@@ -298,7 +300,6 @@ void update_delta_stat(socket_stats_t* p_curr_stat, socket_stats_t* p_prev_stat)
 	p_prev_stat->counters.n_tcp_blocked_rwnd = (p_curr_stat->counters.n_tcp_blocked_rwnd - p_prev_stat->counters.n_tcp_blocked_rwnd) / delay;
 	p_prev_stat->counters.n_tcp_updates_rtt = (p_curr_stat->counters.n_tcp_updates_rtt - p_prev_stat->counters.n_tcp_updates_rtt) / delay;
 	p_prev_stat->counters.n_tcp_rst = (p_curr_stat->counters.n_tcp_rst - p_prev_stat->counters.n_tcp_rst) / delay;
-	p_prev_stat->counters.n_tcp_ecn = (p_curr_stat->counters.n_tcp_ecn - p_prev_stat->counters.n_tcp_ecn) / delay;
 */
 #undef STAT_COUNTERS_DELTA
 #undef STAT_DELTA
