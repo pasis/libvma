@@ -214,6 +214,8 @@ void print_full_stats(socket_stats_t* p_si_stats, mc_grp_info_t* p_mc_grp_info, 
 	fprintf(filename, "TCP n_tcp_updates_rtt: %u\n", p_si_stats->counters.n_tcp_updates_rtt);
 	fprintf(filename, "TCP n_tcp_rst: %u\n", p_si_stats->counters.n_tcp_rst);
 	fprintf(filename, "TCP n_tcp_ecn: %u\n", p_si_stats->counters.n_tcp_ecn);
+	fprintf(filename, "TCP n_ticks: %u\n", p_si_stats->counters.n_ticks);
+	fprintf(filename, "TCP n_ticks_ss: %u\n", p_si_stats->counters.n_ticks_ss);
 	fprintf(filename, "TCP --------------------------------\n");
 	fprintf(filename, "TCP n_tcp_mss: %u\n", p_si_stats->tcp.n_tcp_mss);
 	fprintf(filename, "TCP n_tcp_rto: %u\n", p_si_stats->tcp.n_tcp_rto);

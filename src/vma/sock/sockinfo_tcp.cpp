@@ -683,6 +683,9 @@ void sockinfo_tcp::tcp_timer()
 	return_pending_rx_buffs();
 	return_pending_tx_buffs();
 
+	++m_p_socket_stats->counters.n_ticks;
+	if (m_pcb.cwnd < m_pcb.ssthresh)
+		++m_p_socket_stats->counters.n_ticks_ss;
 	copy_tcp_stats(m_p_socket_stats, &m_pcb.stats);
 	copy_tcp_metrics(&m_p_socket_stats->tcp, &m_pcb);
 }

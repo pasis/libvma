@@ -181,6 +181,9 @@ typedef struct {
 	uint32_t    n_tcp_updates_rtt;
 	uint32_t    n_tcp_rst;
 	uint32_t    n_tcp_ecn;
+
+	uint32_t    n_ticks;
+	uint32_t    n_ticks_ss;
 } socket_counters_t;
 
 typedef struct {

@@ -231,6 +231,8 @@ void update_delta_stat(socket_stats_t* p_curr_stat, socket_stats_t* p_prev_stat)
 	STAT_COUNTERS_DELTA(n_tcp_updates_rtt);
 	STAT_COUNTERS_DELTA(n_tcp_rst);
 	STAT_COUNTERS_DELTA(n_tcp_ecn);
+	STAT_COUNTERS_DELTA(n_ticks);
+	STAT_COUNTERS_DELTA(n_ticks_ss);
 
 	p_prev_stat->tcp.n_tcp_mss = p_curr_stat->tcp.n_tcp_mss;
 	p_prev_stat->tcp.n_tcp_rto = p_curr_stat->tcp.n_tcp_rto;
