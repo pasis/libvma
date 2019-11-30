@@ -164,48 +164,7 @@ typedef struct {
 	uint32_t    n_tx_os_eagain;
 	uint32_t    n_tx_migrations;
 	uint32_t    n_tx_dummy;
-
-/* XXX
-	uint32_t    n_tcp_rto;
-	uint32_t    n_tcp_rtx_fast;
-	uint32_t    n_tcp_rtx_rto;
-	uint32_t    n_tcp_rtx_ss;
-	uint32_t    n_tcp_rtx_spurious;
-	uint32_t    n_tcp_recovered_fast;
-	uint32_t    n_tcp_dupacks;
-	uint32_t    n_tcp_ofo;
-	uint32_t    n_tcp_underruns;
-	uint32_t    n_tcp_blocked_cwnd;
-	uint32_t    n_tcp_blocked_rwnd;
-	uint32_t    n_tcp_blocked_sndbuf;
-	uint32_t    n_tcp_updates_rtt;
-	uint32_t    n_tcp_rst;
-
-	uint32_t    n_tcp_rx_ignored;
-	uint32_t    n_tcp_rx_dropped;
-	uint32_t    n_tcp_memerr_pbuf;
-	uint32_t    n_tcp_memerr_seg;
-
-	uint32_t    n_ticks;
-	uint32_t    n_ticks_ss;
-*/
 } socket_counters_t;
-
-/* XXX
-typedef struct {
-	uint32_t    n_tcp_mss;
-	uint32_t    n_tcp_rto;
-	uint32_t    n_tcp_snd_wnd;
-	uint32_t    n_tcp_cwnd;
-	uint32_t    n_tcp_ssthresh;
-	uint32_t    n_tcp_rtt; // XXX Can't implement
-	uint32_t    n_tcp_snd_nxt;
-	uint32_t    n_tcp_lastack;
-	uint32_t    n_tcp_unsent_q;
-	uint32_t    n_tcp_unacked_q;
-	uint32_t    n_tcp_ooseq_q;
-} tcp_metrics_t;
-*/
 
 typedef struct {
 	int         fd;
@@ -230,14 +189,13 @@ typedef struct {
 	uint32_t                     n_rx_zcopy_pkt_count;
 	uint32_t                     n_tx_ready_byte_count;
 	socket_counters_t            counters;
-// XXX	tcp_metrics_t                tcp;
+	socket_tcp_stats_t           tcp_stats;
 	std::bitset<MC_TABLE_SIZE>   mc_grp_map;
 	ring_logic_t                 ring_alloc_logic_rx;
 	ring_logic_t                 ring_alloc_logic_tx;
 	uint64_t                     ring_user_id_rx;
 	uint64_t                     ring_user_id_tx;
 
-	socket_tcp_stats_t           tcp_stats;
 
 	void reset() {
 		fd = 0;

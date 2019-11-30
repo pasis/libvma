@@ -108,6 +108,27 @@ const u8_t tcp_persist_backoff[7] = { 3, 6, 12, 24, 48, 96, 120 };
 /** Only used for temporary storage. */
 struct tcp_pcb *tcp_tmp_pcb;
 
+static void copy_tcp_metrics(struct tcp_pcb *pcb)
+{
+  struct tcp_seg *seg;
+  u32_t n;
+
+  pcb->stats.n_mss = pcb->mss;
+  pcb->stats.n_rto_timer = pcb->rto * slow_tmr_interval;
+  pcb->stats.n_snd_wnd = pcb->snd_wnd;
+  pcb->stats.n_cwnd = pcb->cwnd;
+  pcb->stats.n_ssthresh = pcb->ssthresh;
+  pcb->stats.n_snd_nxt = pcb->snd_nxt;
+  pcb->stats.n_lastack = pcb->lastack;
+
+  for (seg = pcb->unsent, n = 0; seg != NULL; seg = seg->next, ++n);
+  pcb->stats.n_unsent_q = n;
+  for (seg = pcb->unacked, n = 0; seg != NULL; seg = seg->next, ++n);
+  pcb->stats.n_unacked_q = n;
+  for (seg = pcb->ooseq, n = 0; seg != NULL; seg = seg->next, ++n);
+  pcb->stats.n_ooseq_q = n;
+}
+
 /**
  *
  * @param v value to set
@@ -132,6 +153,8 @@ tcp_tmr(struct tcp_pcb* pcb)
        tcp_tmr() is called. */
     tcp_slowtmr(pcb);
   }
+
+  copy_tcp_metrics(pcb);
 }
 
 /**

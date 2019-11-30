@@ -235,19 +235,16 @@ void update_delta_stat(socket_stats_t* p_curr_stat, socket_stats_t* p_prev_stat)
 	STAT_TCP_DELTA(n_memerr_pbuf);
 	STAT_TCP_DELTA(n_memerr_seg);
 
-/* XXX
-	p_prev_stat->tcp.n_tcp_mss = p_curr_stat->tcp.n_tcp_mss;
-	p_prev_stat->tcp.n_tcp_rto = p_curr_stat->tcp.n_tcp_rto;
-	p_prev_stat->tcp.n_tcp_snd_wnd = p_curr_stat->tcp.n_tcp_snd_wnd;
-	p_prev_stat->tcp.n_tcp_cwnd = p_curr_stat->tcp.n_tcp_cwnd;
-	p_prev_stat->tcp.n_tcp_ssthresh = p_curr_stat->tcp.n_tcp_ssthresh;
-	p_prev_stat->tcp.n_tcp_rtt = p_curr_stat->tcp.n_tcp_rtt;
-	p_prev_stat->tcp.n_tcp_snd_nxt = p_curr_stat->tcp.n_tcp_snd_nxt;
-	p_prev_stat->tcp.n_tcp_lastack = p_curr_stat->tcp.n_tcp_lastack;
-	p_prev_stat->tcp.n_tcp_unsent_q = p_curr_stat->tcp.n_tcp_unsent_q;
-	p_prev_stat->tcp.n_tcp_unacked_q = p_curr_stat->tcp.n_tcp_unacked_q;
-	p_prev_stat->tcp.n_tcp_ooseq_q = p_curr_stat->tcp.n_tcp_ooseq_q;
-*/
+	p_prev_stat->tcp_stats.n_mss = p_curr_stat->tcp_stats.n_mss;
+	p_prev_stat->tcp_stats.n_rto_timer = p_curr_stat->tcp_stats.n_rto_timer;
+	p_prev_stat->tcp_stats.n_snd_wnd = p_curr_stat->tcp_stats.n_snd_wnd;
+	p_prev_stat->tcp_stats.n_cwnd = p_curr_stat->tcp_stats.n_cwnd;
+	p_prev_stat->tcp_stats.n_ssthresh = p_curr_stat->tcp_stats.n_ssthresh;
+	p_prev_stat->tcp_stats.n_snd_nxt = p_curr_stat->tcp_stats.n_snd_nxt;
+	p_prev_stat->tcp_stats.n_lastack = p_curr_stat->tcp_stats.n_lastack;
+	p_prev_stat->tcp_stats.n_unsent_q = p_curr_stat->tcp_stats.n_unsent_q;
+	p_prev_stat->tcp_stats.n_unacked_q = p_curr_stat->tcp_stats.n_unacked_q;
+	p_prev_stat->tcp_stats.n_ooseq_q = p_curr_stat->tcp_stats.n_ooseq_q;
 
 /*
 	p_prev_stat->counters.n_tx_sent_byte_count = (p_curr_stat->counters.n_tx_sent_byte_count - p_prev_stat->counters.n_tx_sent_byte_count) / delay;

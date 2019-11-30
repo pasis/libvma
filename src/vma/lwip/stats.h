@@ -130,6 +130,17 @@ struct socket_tcp_stats {
   u32_t n_dropped;        /* dropped segments due to an error */
   u32_t n_memerr_pbuf;    /* pbuf allocation errors */
   u32_t n_memerr_seg;     /* segment allocation errors */
+
+  u32_t n_mss;
+  u32_t n_rto_timer;
+  u32_t n_snd_wnd;
+  u32_t n_cwnd;
+  u32_t n_ssthresh;
+  u32_t n_snd_nxt;
+  u32_t n_lastack;
+  u32_t n_unsent_q;
+  u32_t n_unacked_q;
+  u32_t n_ooseq_q;
 };
 
 typedef struct socket_tcp_stats socket_tcp_stats_t;
