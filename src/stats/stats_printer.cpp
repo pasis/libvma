@@ -197,39 +197,39 @@ void print_full_stats(socket_stats_t* p_si_stats, mc_grp_info_t* p_mc_grp_info, 
 		fprintf(filename, "Rx and Tx where not active\n");
 	}
 
-	fprintf(filename, "TCP n_tcp_rto: %u\n", p_si_stats->counters.n_tcp_rto);
-	fprintf(filename, "TCP n_tcp_rtx_fast: %u\n", p_si_stats->counters.n_tcp_rtx_fast);
-	fprintf(filename, "TCP n_tcp_rtx_rto: %u\n", p_si_stats->counters.n_tcp_rtx_rto);
-	fprintf(filename, "TCP n_tcp_rtx_ss: %u\n", p_si_stats->counters.n_tcp_rtx_ss);
-	fprintf(filename, "TCP n_tcp_rtx_spurious: %u\n", p_si_stats->counters.n_tcp_rtx_spurious);
-	fprintf(filename, "TCP n_tcp_recovered_fast: %u\n", p_si_stats->counters.n_tcp_recovered_fast);
-	fprintf(filename, "TCP n_tcp_dupacks: %u\n", p_si_stats->counters.n_tcp_dupacks);
-	fprintf(filename, "TCP n_tcp_ofo: %u\n", p_si_stats->counters.n_tcp_ofo);
-	fprintf(filename, "TCP n_tcp_underruns: %u\n", p_si_stats->counters.n_tcp_underruns);
-	fprintf(filename, "TCP n_tcp_blocked_cwnd: %u\n", p_si_stats->counters.n_tcp_blocked_cwnd);
-	fprintf(filename, "TCP n_tcp_blocked_rwnd: %u\n", p_si_stats->counters.n_tcp_blocked_rwnd);
-	fprintf(filename, "TCP n_tcp_blocked_sndbuf: %u\n", p_si_stats->counters.n_tcp_blocked_sndbuf);
-	fprintf(filename, "TCP n_tcp_updates_rtt: %u\n", p_si_stats->counters.n_tcp_updates_rtt);
-	fprintf(filename, "TCP n_tcp_rst: %u\n", p_si_stats->counters.n_tcp_rst);
-	fprintf(filename, "TCP n_ticks: %u\n", p_si_stats->counters.n_ticks);
-	fprintf(filename, "TCP n_ticks_ss: %u\n", p_si_stats->counters.n_ticks_ss);
+	fprintf(filename, "TCP n_rto: %u\n", p_si_stats->tcp_stats.n_rto);
+	fprintf(filename, "TCP n_rtx_fast: %u\n", p_si_stats->tcp_stats.n_rtx_fast);
+	fprintf(filename, "TCP n_rtx_rto: %u\n", p_si_stats->tcp_stats.n_rtx_rto);
+	fprintf(filename, "TCP n_rtx_ss: %u\n", p_si_stats->tcp_stats.n_rtx_ss);
+	fprintf(filename, "TCP n_rtx_spurious: %u\n", p_si_stats->tcp_stats.n_rtx_spurious);
+	fprintf(filename, "TCP n_recovered_fast: %u\n", p_si_stats->tcp_stats.n_recovered_fast);
+	fprintf(filename, "TCP n_dupacks: %u\n", p_si_stats->tcp_stats.n_dupacks);
+	fprintf(filename, "TCP n_ofo: %u\n", p_si_stats->tcp_stats.n_ofo);
+	fprintf(filename, "TCP n_underruns: %u\n", p_si_stats->tcp_stats.n_underruns);
+	fprintf(filename, "TCP n_blocked_cwnd: %u\n", p_si_stats->tcp_stats.n_blocked_cwnd);
+	fprintf(filename, "TCP n_blocked_rwnd: %u\n", p_si_stats->tcp_stats.n_blocked_rwnd);
+	fprintf(filename, "TCP n_blocked_sndbuf: %u\n", p_si_stats->tcp_stats.n_blocked_sndbuf);
+	fprintf(filename, "TCP n_updates_rtt: %u\n", p_si_stats->tcp_stats.n_updates_rtt);
+	fprintf(filename, "TCP n_rst: %u\n", p_si_stats->tcp_stats.n_rst);
 	fprintf(filename, "TCP --------------------------------\n");
-	fprintf(filename, "TCP n_tcp_rx_ignored: %u\n", p_si_stats->counters.n_tcp_rx_ignored);
-	fprintf(filename, "TCP n_tcp_rx_dropped: %u\n", p_si_stats->counters.n_tcp_rx_dropped);
-	fprintf(filename, "TCP n_tcp_memerr_pbuf: %u\n", p_si_stats->counters.n_tcp_memerr_pbuf);
-	fprintf(filename, "TCP n_tcp_memerr_seg: %u\n", p_si_stats->counters.n_tcp_memerr_seg);
+	fprintf(filename, "TCP n_rx_ignored: %u\n", p_si_stats->tcp_stats.n_rx_ignored);
+	fprintf(filename, "TCP n_dropped: %u\n", p_si_stats->tcp_stats.n_dropped);
+	fprintf(filename, "TCP n_memerr_pbuf: %u\n", p_si_stats->tcp_stats.n_memerr_pbuf);
+	fprintf(filename, "TCP n_memerr_seg: %u\n", p_si_stats->tcp_stats.n_memerr_seg);
 	fprintf(filename, "TCP --------------------------------\n");
-	fprintf(filename, "TCP n_tcp_mss: %u\n", p_si_stats->tcp.n_tcp_mss);
-	fprintf(filename, "TCP n_tcp_rto: %u\n", p_si_stats->tcp.n_tcp_rto);
-	fprintf(filename, "TCP n_tcp_snd_wnd: %u\n", p_si_stats->tcp.n_tcp_snd_wnd);
-	fprintf(filename, "TCP n_tcp_cwnd: %u\n", p_si_stats->tcp.n_tcp_cwnd);
-	fprintf(filename, "TCP n_tcp_ssthresh: %u\n", p_si_stats->tcp.n_tcp_ssthresh);
-	fprintf(filename, "TCP n_tcp_rtt: %u\n", p_si_stats->tcp.n_tcp_rtt);
-	fprintf(filename, "TCP n_tcp_snd_nxt: %u\n", p_si_stats->tcp.n_tcp_snd_nxt);
-	fprintf(filename, "TCP n_tcp_lastack: %u\n", p_si_stats->tcp.n_tcp_lastack);
-	fprintf(filename, "TCP n_tcp_unsent_q: %u\n", p_si_stats->tcp.n_tcp_unsent_q);
-	fprintf(filename, "TCP n_tcp_unacked_q: %u\n", p_si_stats->tcp.n_tcp_unacked_q);
-	fprintf(filename, "TCP n_tcp_ooseq_q: %u\n", p_si_stats->tcp.n_tcp_ooseq_q);
+/* XXX
+	fprintf(filename, "TCP n_mss: %u\n", p_si_stats->tcp.n_mss);
+	fprintf(filename, "TCP n_rto: %u\n", p_si_stats->tcp.n_rto);
+	fprintf(filename, "TCP n_snd_wnd: %u\n", p_si_stats->tcp.n_snd_wnd);
+	fprintf(filename, "TCP n_cwnd: %u\n", p_si_stats->tcp.n_cwnd);
+	fprintf(filename, "TCP n_ssthresh: %u\n", p_si_stats->tcp.n_ssthresh);
+	fprintf(filename, "TCP n_rtt: %u\n", p_si_stats->tcp.n_rtt);
+	fprintf(filename, "TCP n_snd_nxt: %u\n", p_si_stats->tcp.n_snd_nxt);
+	fprintf(filename, "TCP n_lastack: %u\n", p_si_stats->tcp.n_lastack);
+	fprintf(filename, "TCP n_unsent_q: %u\n", p_si_stats->tcp.n_unsent_q);
+	fprintf(filename, "TCP n_unacked_q: %u\n", p_si_stats->tcp.n_unacked_q);
+	fprintf(filename, "TCP n_ooseq_q: %u\n", p_si_stats->tcp.n_ooseq_q);
+*/
 }
 
 // Print statistics headers for all sockets - used in case view mode is e_netstat_like

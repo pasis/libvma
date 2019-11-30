@@ -43,6 +43,7 @@
 #include <sys/stat.h>
 #include <vlogger/vlogger.h>
 #include <vma/vma_extra.h>
+#include <vma/lwip/stats.h>
 
 #define NUM_OF_SUPPORTED_CQS                        16
 #define NUM_OF_SUPPORTED_RINGS                      16
@@ -164,6 +165,7 @@ typedef struct {
 	uint32_t    n_tx_migrations;
 	uint32_t    n_tx_dummy;
 
+/* XXX
 	uint32_t    n_tcp_rto;
 	uint32_t    n_tcp_rtx_fast;
 	uint32_t    n_tcp_rtx_rto;
@@ -186,8 +188,10 @@ typedef struct {
 
 	uint32_t    n_ticks;
 	uint32_t    n_ticks_ss;
+*/
 } socket_counters_t;
 
+/* XXX
 typedef struct {
 	uint32_t    n_tcp_mss;
 	uint32_t    n_tcp_rto;
@@ -201,6 +205,7 @@ typedef struct {
 	uint32_t    n_tcp_unacked_q;
 	uint32_t    n_tcp_ooseq_q;
 } tcp_metrics_t;
+*/
 
 typedef struct {
 	int         fd;
@@ -225,12 +230,14 @@ typedef struct {
 	uint32_t                     n_rx_zcopy_pkt_count;
 	uint32_t                     n_tx_ready_byte_count;
 	socket_counters_t            counters;
-	tcp_metrics_t                tcp;
+// XXX	tcp_metrics_t                tcp;
 	std::bitset<MC_TABLE_SIZE>   mc_grp_map;
 	ring_logic_t                 ring_alloc_logic_rx;
 	ring_logic_t                 ring_alloc_logic_tx;
 	uint64_t                     ring_user_id_rx;
 	uint64_t                     ring_user_id_tx;
+
+	socket_tcp_stats_t           tcp_stats;
 
 	void reset() {
 		fd = 0;
@@ -242,7 +249,7 @@ typedef struct {
 		threadid_last_rx = threadid_last_tx = pid_t(0);
 		n_rx_ready_pkt_count = n_rx_ready_byte_count = n_rx_ready_byte_limit = n_rx_zcopy_pkt_count = n_tx_ready_byte_count = 0;
 		memset(&counters, 0, sizeof(counters));
-		memset(&tcp, 0, sizeof(tcp));
+		memset(&tcp_stats, 0, sizeof(tcp_stats));
 		mc_grp_map.reset();
 		ring_user_id_rx = ring_user_id_tx = 0;
 		ring_alloc_logic_rx = ring_alloc_logic_tx = RING_LOGIC_PER_INTERFACE;
@@ -413,6 +420,8 @@ void vma_shmem_stats_close();
 
 void vma_stats_instance_create_socket_block(socket_stats_t*);
 void vma_stats_instance_remove_socket_block(socket_stats_t*);
+void vma_tcp_stats_instance_create_socket_block(socket_tcp_stats_t*, socket_stats_t*);
+void vma_tcp_stats_instance_remove_socket_block(socket_tcp_stats_t*);
 
 void vma_stats_mc_group_add(in_addr_t mc_grp, socket_stats_t* p_socket_stats);
 void vma_stats_mc_group_remove(in_addr_t mc_grp, socket_stats_t* p_socket_stats);

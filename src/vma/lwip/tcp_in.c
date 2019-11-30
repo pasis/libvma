@@ -1099,7 +1099,7 @@ tcp_receive(struct tcp_pcb *pcb, tcp_in_data* in_data)
       pcb->polltmr = 0;
     } else {
       /* Out of sequence ACK, didn't really ack anything */
-      PCB_STATS_INC(n_ignored);
+      PCB_STATS_INC(n_rx_ignored);
       pcb->acked = 0;
       tcp_send_empty_ack(pcb);
     }
@@ -1272,7 +1272,7 @@ tcp_receive(struct tcp_pcb *pcb, tcp_in_data* in_data)
         /* the whole segment is < rcv_nxt */
         /* must be a duplicate of a packet that has already been correctly handled */
 
-        PCB_STATS_INC(n_ignored);
+        PCB_STATS_INC(n_rx_ignored);
         LWIP_DEBUGF(TCP_INPUT_DEBUG, ("tcp_receive: duplicate seqno %"U32_F"\n", in_data->seqno));
         tcp_ack_now(pcb);
       }
@@ -1581,7 +1581,7 @@ tcp_receive(struct tcp_pcb *pcb, tcp_in_data* in_data)
       }
     } else {
       /* The incoming segment is not withing the window. */
-      PCB_STATS_INC(n_ignored);
+      PCB_STATS_INC(n_rx_ignored);
       tcp_send_empty_ack(pcb);
     }
   } else {
@@ -1590,7 +1590,7 @@ tcp_receive(struct tcp_pcb *pcb, tcp_in_data* in_data)
     /*if (TCP_SEQ_GT(pcb->rcv_nxt, seqno) ||
       TCP_SEQ_GEQ(seqno, pcb->rcv_nxt + pcb->rcv_wnd)) {*/
     if(!TCP_SEQ_BETWEEN(in_data->seqno, pcb->rcv_nxt, pcb->rcv_nxt + pcb->rcv_wnd-1)){
-      PCB_STATS_INC(n_ignored);
+      PCB_STATS_INC(n_rx_ignored);
       tcp_ack_now(pcb);
     }
   }

@@ -294,7 +294,7 @@ struct tcp_pcb {
 #define TF_NAGLEMEMERR ((u16_t)0x0080U)   /* nagle enabled, memerr, try to output to prevent delayed ACK to happen */
 #define TF_WND_SCALE   ((u16_t)0x0100U) /* Window Scale option enabled */
 
-  struct tcp_stats stats;
+  socket_tcp_stats_t stats;
 
   /* the rest of the fields are in host byte order
      as we have to do some math with them */

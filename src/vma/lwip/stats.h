@@ -110,7 +110,7 @@ void stats_display_proto(struct stats_proto *proto, char *name);
 #define stats_display_proto(proto, name)
 #endif /* LWIP_STATS_DISPLAY */
 
-struct tcp_stats {
+struct socket_tcp_stats {
   u32_t n_rto;            /* number of RTO */
   u32_t n_rtx_fast;       /* fast retransmits */
   u32_t n_rtx_rto;        /* retransmits caused by RTO */
@@ -122,14 +122,17 @@ struct tcp_stats {
   u32_t n_underruns;      /* underruns (no segments to send) */
   u32_t n_blocked_cwnd;   /* sending blocked by cwnd */
   u32_t n_blocked_rwnd;   /* sending blocked by rwnd */
+  u32_t n_blocked_sndbuf; /* sending blocked by snd_buf */
   u32_t n_updates_rtt;    /* RTT measurements */
   u32_t n_rst;            /* RST segments */
 
-  u32_t n_ignored;        /* ignored incoming segments */
+  u32_t n_rx_ignored;     /* ignored incoming segments */
   u32_t n_dropped;        /* dropped segments due to an error */
   u32_t n_memerr_pbuf;    /* pbuf allocation errors */
   u32_t n_memerr_seg;     /* segment allocation errors */
 };
+
+typedef struct socket_tcp_stats socket_tcp_stats_t;
 
 #ifdef NO_TCP_EXTRA_STATS
 #define EXTRA_STATS_INC do {} while (0)
