@@ -255,7 +255,10 @@ sockinfo_tcp::sockinfo_tcp(int fd):
 	si_tcp_logdbg("tcp socket created");
 
 	tcp_pcb_init(&m_pcb, TCP_PRIO_NORMAL);
-	vma_tcp_stats_instance_create_socket_block(&m_pcb.stats, m_p_socket_stats);
+
+#ifdef DEFINED_EXTRA_STATS
+	vma_stats_instance_add_tcp(&m_pcb.stats, m_p_socket_stats);
+#endif /* DEFINED_EXTRA_STATS */
 
 	si_tcp_logdbg("new pcb %p pcb state %d", &m_pcb, get_tcp_state(&m_pcb));
 	tcp_arg(&m_pcb, this);
@@ -330,7 +333,9 @@ sockinfo_tcp::~sockinfo_tcp()
 		prepare_to_close();
 	}
 
-	vma_tcp_stats_instance_remove_socket_block(&m_pcb.stats);
+#ifdef DEFINED_EXTRA_STATS
+	vma_stats_instance_del_tcp(&m_pcb.stats);
+#endif /* DEFINED_EXTRA_STATS */
 
 	do_wakeup();
 
@@ -568,52 +573,6 @@ void sockinfo_tcp::handle_socket_linger() {
 	}
 }
 
-#if 0 // XXX
-static void copy_tcp_stats(socket_stats_t *dst, struct tcp_stats *src)
-{
-	dst->counters.n_tcp_rto = src->n_rto;
-	dst->counters.n_tcp_rtx_fast = src->n_rtx_fast;
-	dst->counters.n_tcp_rtx_rto = src->n_rtx_rto;
-	dst->counters.n_tcp_rtx_ss = src->n_rtx_ss;
-	dst->counters.n_tcp_rtx_spurious = src->n_rtx_spurious;
-	dst->counters.n_tcp_recovered_fast =  src->n_recovered_fast;
-	dst->counters.n_tcp_dupacks = src->n_dupacks;
-	dst->counters.n_tcp_ofo = src->n_ofo;
-	dst->counters.n_tcp_underruns = src->n_underruns;
-	dst->counters.n_tcp_blocked_cwnd = src->n_blocked_cwnd;
-	dst->counters.n_tcp_blocked_rwnd = src->n_blocked_rwnd;
-	dst->counters.n_tcp_updates_rtt = src->n_updates_rtt;
-	dst->counters.n_tcp_rst = src->n_rst;
-
-	dst->counters.n_tcp_rx_ignored = src->n_ignored;
-	dst->counters.n_tcp_rx_dropped = src->n_dropped;
-	dst->counters.n_tcp_memerr_pbuf = src->n_memerr_pbuf;
-	dst->counters.n_tcp_memerr_seg = src->n_memerr_seg;
-}
-
-static void copy_tcp_metrics(tcp_metrics_t *dst, struct tcp_pcb *pcb)
-{
-	struct tcp_seg *seg;
-	uint32_t n;
-
-	dst->n_tcp_mss = pcb->mss;
-	dst->n_tcp_rto = pcb->rto * safe_mce_sys().tcp_timer_resolution_msec * 2;
-	dst->n_tcp_snd_wnd = pcb->snd_wnd;
-	dst->n_tcp_cwnd = pcb->cwnd;
-	dst->n_tcp_ssthresh = pcb->ssthresh;
-	/* dst->n_tcp_rtt */
-	dst->n_tcp_snd_nxt = pcb->snd_nxt;
-	dst->n_tcp_lastack = pcb->lastack;
-
-	for (seg = pcb->unsent, n = 0; seg != NULL; seg = seg->next, ++n);
-	dst->n_tcp_unsent_q = n;
-	for (seg = pcb->unacked, n = 0; seg != NULL; seg = seg->next, ++n);
-	dst->n_tcp_unacked_q = n;
-	for (seg = pcb->ooseq, n = 0; seg != NULL; seg = seg->next, ++n);
-	dst->n_tcp_ooseq_q = n;
-}
-#endif
-
 // call this function if you won't be able to go through si_tcp dtor
 // do not call this function twice
 void sockinfo_tcp::force_close()
@@ -629,7 +588,6 @@ void sockinfo_tcp::force_close()
 	if (!is_closable()) abort_connection();
 
 	//print the statistics of the socket to vma_stats file
-// XXX	copy_tcp_stats(m_p_socket_stats, &m_pcb.stats);
 	vma_stats_instance_remove_socket_block(m_p_socket_stats);
 
 	BULLSEYE_EXCLUDE_BLOCK_START
@@ -689,14 +647,6 @@ void sockinfo_tcp::tcp_timer()
 
 	return_pending_rx_buffs();
 	return_pending_tx_buffs();
-
-/* XXX
-	++m_p_socket_stats->counters.n_ticks;
-	if (m_pcb.cwnd < m_pcb.ssthresh)
-		++m_p_socket_stats->counters.n_ticks_ss;
-	copy_tcp_stats(m_p_socket_stats, &m_pcb.stats);
-	copy_tcp_metrics(&m_p_socket_stats->tcp, &m_pcb);
-*/
 }
 
 bool sockinfo_tcp::prepare_dst_to_send(bool is_accepted_socket /* = false */)
@@ -906,7 +856,7 @@ retry_is_ready:
 					errno = ECONNRESET;
 					goto err;
 				}
-				++m_pcb.stats.n_blocked_sndbuf;
+				EXTRA_STATS_INC(m_pcb.stats.n_blocked_sndbuf);
 				//force out TCP data before going on wait()
 				tcp_output(&m_pcb);
 
@@ -1165,7 +1115,7 @@ err_t sockinfo_tcp::ip_output(struct pbuf *p, void* v_p_conn, int is_rexmit, uin
 	if (is_rexmit) {
 		p_si_tcp->m_p_socket_stats->counters.n_tx_retransmits++;
 		if (p_si_tcp->m_pcb.cwnd < p_si_tcp->m_pcb.ssthresh)
-			p_si_tcp->m_pcb.stats.n_rtx_ss++;
+			EXTRA_STATS_INC(p_si_tcp->m_pcb.stats.n_rtx_ss);
 	}
 
 	return ERR_OK;

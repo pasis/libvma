@@ -197,6 +197,7 @@ void print_full_stats(socket_stats_t* p_si_stats, mc_grp_info_t* p_mc_grp_info, 
 		fprintf(filename, "Rx and Tx where not active\n");
 	}
 
+#ifdef DEFINED_EXTRA_STATS
 	if (p_si_stats->socket_type == SOCK_STREAM && b_any_activity) {
 		fprintf(filename, "TCP n_rto: %u\n", p_si_stats->tcp_stats.n_rto);
 		fprintf(filename, "TCP n_rtx_fast: %u\n", p_si_stats->tcp_stats.n_rtx_fast);
@@ -229,6 +230,7 @@ void print_full_stats(socket_stats_t* p_si_stats, mc_grp_info_t* p_mc_grp_info, 
 		fprintf(filename, "TCP n_unacked_q: %u\n", p_si_stats->tcp_stats.n_unacked_q);
 		fprintf(filename, "TCP n_ooseq_q: %u\n", p_si_stats->tcp_stats.n_ooseq_q);
 	}
+#endif /* DEFINED_EXTRA_STATS */
 }
 
 // Print statistics headers for all sockets - used in case view mode is e_netstat_like

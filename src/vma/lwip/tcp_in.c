@@ -119,6 +119,7 @@ L3_level_tcp_input(struct pbuf *p, struct tcp_pcb* pcb)
         /* drop short packets */
         LWIP_DEBUGF(TCP_INPUT_DEBUG, ("tcp_input: short packet (%"U16_F" bytes) discarded\n", (u16_t)p->tot_len));
         TCP_STATS_INC(tcp.lenerr);
+        TCP_STATS_INC(tcp.drop);
         PCB_STATS_INC(n_dropped);
         pbuf_free(p);
         return;
@@ -131,6 +132,7 @@ L3_level_tcp_input(struct pbuf *p, struct tcp_pcb* pcb)
         /* drop short packets */
         LWIP_DEBUGF(TCP_INPUT_DEBUG, ("tcp_input: short packet\n"));
         TCP_STATS_INC(tcp.lenerr);
+        TCP_STATS_INC(tcp.drop);
         PCB_STATS_INC(n_dropped);
         pbuf_free(p);
         return;
@@ -187,7 +189,8 @@ L3_level_tcp_input(struct pbuf *p, struct tcp_pcb* pcb)
 					/* if err == ERR_ABRT, 'pcb' is already deallocated */
 					/* drop incoming packets, because pcb is "full" */
 					LWIP_DEBUGF(TCP_INPUT_DEBUG, ("tcp_input: drop incoming packets, because pcb is \"full\"\n"));
-					PCB_STATS_INC(n_dropped);;
+					TCP_STATS_INC(tcp.drop);
+					PCB_STATS_INC(n_dropped);
 					pbuf_free(p);
 					return;
 				}
@@ -313,6 +316,7 @@ L3_level_tcp_input(struct pbuf *p, struct tcp_pcb* pcb)
         LWIP_DEBUGF(TCP_RST_DEBUG, ("tcp_input: no PCB match found, resetting.\n"));
         if (!(TCPH_FLAGS(in_data.tcphdr) & TCP_RST)) {
             TCP_STATS_INC(tcp.proterr);
+            TCP_STATS_INC(tcp.drop);
             PCB_STATS_INC(n_dropped);
             tcp_rst(in_data.ackno, in_data.seqno + in_data.tcplen, in_data.tcphdr->dest,
             		in_data.tcphdr->src, pcb);

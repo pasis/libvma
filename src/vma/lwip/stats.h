@@ -110,6 +110,8 @@ void stats_display_proto(struct stats_proto *proto, char *name);
 #define stats_display_proto(proto, name)
 #endif /* LWIP_STATS_DISPLAY */
 
+#ifdef DEFINED_EXTRA_STATS
+
 struct socket_tcp_stats {
   u32_t n_rto;            /* number of RTO */
   u32_t n_rtx_fast;       /* fast retransmits */
@@ -145,11 +147,11 @@ struct socket_tcp_stats {
 
 typedef struct socket_tcp_stats socket_tcp_stats_t;
 
-#ifdef NO_TCP_EXTRA_STATS
-#define EXTRA_STATS_INC do {} while (0)
-#else
 #define EXTRA_STATS_INC(x) ++x
-#endif /* NO_TCP_EXTRA_STATS */
+
+#else /* DEFINED_EXTRA_STATS */
+#define EXTRA_STATS_INC(x) do {} while (0)
+#endif /* DEFINED_EXTRA_STATS */
 
 #define PCB_STATS_INC(x) EXTRA_STATS_INC(pcb->stats.x)
 

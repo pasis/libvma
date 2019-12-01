@@ -1804,8 +1804,14 @@ tcp_rexmit_rto(struct tcp_pcb *pcb)
   }
 
   /* Move all unacked segments to the head of the unsent queue */
-  for (seg = pcb->unacked; seg->next != NULL; seg = seg->next)
-    PCB_STATS_INC(n_rtx_rto); /* XXX may be less than this value! */
+  for (seg = pcb->unacked; seg->next != NULL; seg = seg->next) {
+    /*
+     * If some of these retransmits are removed from the unsent queue,
+     * they will be counted in n_rtx_spurious. Therefore, actually sent
+     * retransmits equals to (n_rtx_rto - n_rtx_spurious).
+     */
+    PCB_STATS_INC(n_rtx_rto);
+  }
   /* concatenate unsent queue after unacked queue */
   seg->next = pcb->unsent;
 #if TCP_OVERSIZE && TCP_OVERSIZE_DBGCHECK

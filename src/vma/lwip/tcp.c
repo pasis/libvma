@@ -108,6 +108,7 @@ const u8_t tcp_persist_backoff[7] = { 3, 6, 12, 24, 48, 96, 120 };
 /** Only used for temporary storage. */
 struct tcp_pcb *tcp_tmp_pcb;
 
+#ifdef DEFINED_EXTRA_STATS
 static void copy_tcp_metrics(struct tcp_pcb *pcb)
 {
   struct tcp_seg *seg;
@@ -128,6 +129,13 @@ static void copy_tcp_metrics(struct tcp_pcb *pcb)
   for (seg = pcb->ooseq, n = 0; seg != NULL; seg = seg->next, ++n);
   pcb->stats.n_ooseq_q = n;
 }
+#else /* DEFINED_EXTRA_STATS */
+static void copy_tcp_metrics(struct tcp_pcb *pcb)
+{
+  /* Do nothing is extra statistics is off. */
+  (void)pcb;
+}
+#endif /* DEFINED_EXTRA_STATS */
 
 /**
  *

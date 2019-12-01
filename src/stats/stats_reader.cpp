@@ -215,6 +215,7 @@ void update_delta_stat(socket_stats_t* p_curr_stat, socket_stats_t* p_prev_stat)
 	STAT_COUNTERS_DELTA(n_tx_migrations);
 	STAT_COUNTERS_DELTA(n_tx_retransmits);
 
+#ifdef DEFINED_EXTRA_STATS
 	if (p_curr_stat->socket_type == SOCK_STREAM) {
 		STAT_TCP_DELTA(n_rto);
 		STAT_TCP_DELTA(n_rtx_fast);
@@ -247,6 +248,7 @@ void update_delta_stat(socket_stats_t* p_curr_stat, socket_stats_t* p_prev_stat)
 		p_prev_stat->tcp_stats.n_unacked_q = p_curr_stat->tcp_stats.n_unacked_q;
 		p_prev_stat->tcp_stats.n_ooseq_q = p_curr_stat->tcp_stats.n_ooseq_q;
 	}
+#endif /* DEFINED_EXTRA_STATS */
 
 #undef STAT_TCP_DELTA
 #undef STAT_COUNTERS_DELTA

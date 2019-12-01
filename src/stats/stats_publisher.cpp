@@ -398,7 +398,8 @@ void vma_stats_instance_remove_socket_block(socket_stats_t* local_addr)
 	g_lock_skt_inst_arr.unlock();
 }
 
-void vma_tcp_stats_instance_create_socket_block(socket_tcp_stats_t* tcp_stats_addr, socket_stats_t* stats_addr)
+#ifdef DEFINED_EXTRA_STATS
+void vma_stats_instance_add_tcp(socket_tcp_stats_t* tcp_stats_addr, socket_stats_t* stats_addr)
 {
 	socket_stats_t* p_skt_stats;
 	stats_read_map_t::iterator iter;
@@ -411,10 +412,11 @@ void vma_tcp_stats_instance_create_socket_block(socket_tcp_stats_t* tcp_stats_ad
 	}
 }
 
-void vma_tcp_stats_instance_remove_socket_block(socket_tcp_stats_t* tcp_stats_addr)
+void vma_stats_instance_del_tcp(socket_tcp_stats_t* tcp_stats_addr)
 {
 	(void)g_p_stats_data_reader->pop_data_reader(tcp_stats_addr);
 }
+#endif /* DEFINED_EXTRA_STATS */
 
 void vma_stats_mc_group_add(in_addr_t mc_grp, socket_stats_t* p_socket_stats)
 {
