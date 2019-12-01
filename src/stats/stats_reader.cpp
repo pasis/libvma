@@ -215,90 +215,39 @@ void update_delta_stat(socket_stats_t* p_curr_stat, socket_stats_t* p_prev_stat)
 	STAT_COUNTERS_DELTA(n_tx_migrations);
 	STAT_COUNTERS_DELTA(n_tx_retransmits);
 
-	STAT_TCP_DELTA(n_rto);
-	STAT_TCP_DELTA(n_rtx_fast);
-	STAT_TCP_DELTA(n_rtx_rto);
-	STAT_TCP_DELTA(n_rtx_ss);
-	STAT_TCP_DELTA(n_rtx_spurious);
-	STAT_TCP_DELTA(n_recovered_fast);
-	STAT_TCP_DELTA(n_dupacks);
-	STAT_TCP_DELTA(n_ofo);
-	STAT_TCP_DELTA(n_underruns);
-	STAT_TCP_DELTA(n_blocked_cwnd);
-	STAT_TCP_DELTA(n_blocked_rwnd);
-	STAT_TCP_DELTA(n_blocked_sndbuf);
-	STAT_TCP_DELTA(n_updates_rtt);
-	STAT_TCP_DELTA(n_rst);
+	if (p_curr_stat->socket_type == SOCK_STREAM) {
+		STAT_TCP_DELTA(n_rto);
+		STAT_TCP_DELTA(n_rtx_fast);
+		STAT_TCP_DELTA(n_rtx_rto);
+		STAT_TCP_DELTA(n_rtx_ss);
+		STAT_TCP_DELTA(n_rtx_spurious);
+		STAT_TCP_DELTA(n_recovered_fast);
+		STAT_TCP_DELTA(n_dupacks);
+		STAT_TCP_DELTA(n_ofo);
+		STAT_TCP_DELTA(n_underruns);
+		STAT_TCP_DELTA(n_blocked_cwnd);
+		STAT_TCP_DELTA(n_blocked_rwnd);
+		STAT_TCP_DELTA(n_blocked_sndbuf);
+		STAT_TCP_DELTA(n_updates_rtt);
+		STAT_TCP_DELTA(n_rst);
 
-	STAT_TCP_DELTA(n_rx_ignored);
-	STAT_TCP_DELTA(n_dropped);
-	STAT_TCP_DELTA(n_memerr_pbuf);
-	STAT_TCP_DELTA(n_memerr_seg);
+		STAT_TCP_DELTA(n_rx_ignored);
+		STAT_TCP_DELTA(n_dropped);
+		STAT_TCP_DELTA(n_memerr_pbuf);
+		STAT_TCP_DELTA(n_memerr_seg);
 
-	p_prev_stat->tcp_stats.n_mss = p_curr_stat->tcp_stats.n_mss;
-	p_prev_stat->tcp_stats.n_rto_timer = p_curr_stat->tcp_stats.n_rto_timer;
-	p_prev_stat->tcp_stats.n_snd_wnd = p_curr_stat->tcp_stats.n_snd_wnd;
-	p_prev_stat->tcp_stats.n_cwnd = p_curr_stat->tcp_stats.n_cwnd;
-	p_prev_stat->tcp_stats.n_ssthresh = p_curr_stat->tcp_stats.n_ssthresh;
-	p_prev_stat->tcp_stats.n_snd_nxt = p_curr_stat->tcp_stats.n_snd_nxt;
-	p_prev_stat->tcp_stats.n_lastack = p_curr_stat->tcp_stats.n_lastack;
-	p_prev_stat->tcp_stats.n_unsent_q = p_curr_stat->tcp_stats.n_unsent_q;
-	p_prev_stat->tcp_stats.n_unacked_q = p_curr_stat->tcp_stats.n_unacked_q;
-	p_prev_stat->tcp_stats.n_ooseq_q = p_curr_stat->tcp_stats.n_ooseq_q;
+		p_prev_stat->tcp_stats.n_mss = p_curr_stat->tcp_stats.n_mss;
+		p_prev_stat->tcp_stats.n_rto_timer = p_curr_stat->tcp_stats.n_rto_timer;
+		p_prev_stat->tcp_stats.n_snd_wnd = p_curr_stat->tcp_stats.n_snd_wnd;
+		p_prev_stat->tcp_stats.n_cwnd = p_curr_stat->tcp_stats.n_cwnd;
+		p_prev_stat->tcp_stats.n_ssthresh = p_curr_stat->tcp_stats.n_ssthresh;
+		p_prev_stat->tcp_stats.n_snd_nxt = p_curr_stat->tcp_stats.n_snd_nxt;
+		p_prev_stat->tcp_stats.n_lastack = p_curr_stat->tcp_stats.n_lastack;
+		p_prev_stat->tcp_stats.n_unsent_q = p_curr_stat->tcp_stats.n_unsent_q;
+		p_prev_stat->tcp_stats.n_unacked_q = p_curr_stat->tcp_stats.n_unacked_q;
+		p_prev_stat->tcp_stats.n_ooseq_q = p_curr_stat->tcp_stats.n_ooseq_q;
+	}
 
-/*
-	p_prev_stat->counters.n_tx_sent_byte_count = (p_curr_stat->counters.n_tx_sent_byte_count - p_prev_stat->counters.n_tx_sent_byte_count) / delay;
-	p_prev_stat->counters.n_tx_sent_pkt_count = (p_curr_stat->counters.n_tx_sent_pkt_count - p_prev_stat->counters.n_tx_sent_pkt_count) / delay;
-	p_prev_stat->counters.n_tx_drops = (p_curr_stat->counters.n_tx_drops - p_prev_stat->counters.n_tx_drops) / delay;
-	p_prev_stat->counters.n_tx_errors = (p_curr_stat->counters.n_tx_errors - p_prev_stat->counters.n_tx_errors) / delay;
-	p_prev_stat->counters.n_tx_dummy = (p_curr_stat->counters.n_tx_dummy - p_prev_stat->counters.n_tx_dummy) / delay;
-	p_prev_stat->counters.n_tx_os_bytes = (p_curr_stat->counters.n_tx_os_bytes - p_prev_stat->counters.n_tx_os_bytes) / delay;
-	p_prev_stat->counters.n_tx_os_packets = (p_curr_stat->counters.n_tx_os_packets - p_prev_stat->counters.n_tx_os_packets) / delay;
-	p_prev_stat->counters.n_tx_os_eagain = (p_curr_stat->counters.n_tx_os_eagain - p_prev_stat->counters.n_tx_os_eagain) / delay;
-	p_prev_stat->counters.n_tx_os_errors = (p_curr_stat->counters.n_tx_os_errors - p_prev_stat->counters.n_tx_os_errors) / delay;
-	p_prev_stat->counters.n_rx_bytes = (p_curr_stat->counters.n_rx_bytes - p_prev_stat->counters.n_rx_bytes) / delay;
-	p_prev_stat->counters.n_rx_packets = (p_curr_stat->counters.n_rx_packets - p_prev_stat->counters.n_rx_packets) / delay;
-	p_prev_stat->counters.n_rx_eagain = (p_curr_stat->counters.n_rx_eagain - p_prev_stat->counters.n_rx_eagain) / delay;
-	p_prev_stat->counters.n_rx_errors = (p_curr_stat->counters.n_rx_errors - p_prev_stat->counters.n_rx_errors) / delay;
-	p_prev_stat->counters.n_rx_os_bytes = (p_curr_stat->counters.n_rx_os_bytes - p_prev_stat->counters.n_rx_os_bytes) / delay;
-	p_prev_stat->counters.n_rx_os_packets = (p_curr_stat->counters.n_rx_os_packets - p_prev_stat->counters.n_rx_os_packets) / delay;
-	p_prev_stat->counters.n_rx_os_eagain = (p_curr_stat->counters.n_rx_os_eagain - p_prev_stat->counters.n_rx_os_eagain) / delay;
-	p_prev_stat->counters.n_rx_os_errors = (p_curr_stat->counters.n_rx_os_errors - p_prev_stat->counters.n_rx_os_errors) / delay;
-	p_prev_stat->counters.n_rx_poll_miss = (p_curr_stat->counters.n_rx_poll_miss - p_prev_stat->counters.n_rx_poll_miss) / delay;
-	p_prev_stat->counters.n_rx_poll_hit = (p_curr_stat->counters.n_rx_poll_hit - p_prev_stat->counters.n_rx_poll_hit) / delay;
-	p_prev_stat->n_rx_ready_byte_count = p_curr_stat->n_rx_ready_byte_count;
-	p_prev_stat->n_tx_ready_byte_count = p_curr_stat->n_tx_ready_byte_count;
-	p_prev_stat->n_rx_ready_byte_limit = p_curr_stat->n_rx_ready_byte_limit;
-	p_prev_stat->counters.n_rx_ready_byte_max = p_curr_stat->counters.n_rx_ready_byte_max;
-	p_prev_stat->counters.n_rx_ready_byte_drop = (p_curr_stat->counters.n_rx_ready_byte_drop - p_prev_stat->counters.n_rx_ready_byte_drop) / delay;
-	p_prev_stat->counters.n_rx_ready_pkt_drop = (p_curr_stat->counters.n_rx_ready_pkt_drop - p_prev_stat->counters.n_rx_ready_pkt_drop) / delay;
-	p_prev_stat->n_rx_ready_pkt_count = p_curr_stat->n_rx_ready_pkt_count;
-	p_prev_stat->counters.n_rx_ready_pkt_max = p_curr_stat->counters.n_rx_ready_pkt_max;
-	p_prev_stat->n_rx_zcopy_pkt_count = p_curr_stat->n_rx_zcopy_pkt_count;
-
-	p_prev_stat->threadid_last_rx = p_curr_stat->threadid_last_rx;
-	p_prev_stat->threadid_last_tx = p_curr_stat->threadid_last_tx;
-
-	p_prev_stat->counters.n_rx_migrations = (p_curr_stat->counters.n_rx_migrations - p_prev_stat->counters.n_rx_migrations) / delay;
-	p_prev_stat->counters.n_tx_migrations = (p_curr_stat->counters.n_tx_migrations - p_prev_stat->counters.n_tx_migrations) / delay;
-	p_prev_stat->counters.n_tx_retransmits = (p_curr_stat->counters.n_tx_retransmits - p_prev_stat->counters.n_tx_retransmits) / delay;
-
-	p_prev_stat->counters.n_tcp_rto = (p_curr_stat->counters.n_tcp_rto - p_prev_stat->counters.n_tcp_rto) / delay;
-	p_prev_stat->counters.n_tcp_rtx_fast = (p_curr_stat->counters.n_tcp_rtx_fast - p_prev_stat->counters.n_tcp_rtx_fast) / delay;
-	p_prev_stat->counters.n_tcp_rtx_rto = (p_curr_stat->counters.n_tcp_rtx_rto - p_prev_stat->counters.n_tcp_rtx_rto) / delay;
-	p_prev_stat->counters.n_tcp_rtx_ss = (p_curr_stat->counters.n_tcp_rtx_ss - p_prev_stat->counters.n_tcp_rtx_ss) / delay;
-	p_prev_stat->counters.n_tcp_rtx_spurious = (p_curr_stat->counters.n_tcp_rtx_spurious - p_prev_stat->counters.n_tcp_rtx_spurious) / delay;
-	p_prev_stat->counters.n_tcp_recovered_fast = (p_curr_stat->counters.n_tcp_recovered_fast - p_prev_stat->counters.n_tcp_recovered_fast) / delay;
-	p_prev_stat->counters.n_tcp_dupacks = (p_curr_stat->counters.n_tcp_dupacks - p_prev_stat->counters.n_tcp_dupacks) / delay;
-	p_prev_stat->counters.n_tcp_ofo = (p_curr_stat->counters.n_tcp_ofo - p_prev_stat->counters.n_tcp_ofo) / delay;
-	p_prev_stat->counters.n_tcp_rx_ignored = (p_curr_stat->counters.n_tcp_rx_ignored - p_prev_stat->counters.n_tcp_rx_ignored) / delay;
-	p_prev_stat->counters.n_tcp_rx_dropped = (p_curr_stat->counters.n_tcp_rx_dropped - p_prev_stat->counters.n_tcp_rx_dropped) / delay;
-	p_prev_stat->counters.n_tcp_underruns = (p_curr_stat->counters.n_tcp_underruns - p_prev_stat->counters.n_tcp_underruns) / delay;
-	p_prev_stat->counters.n_tcp_blocked_cwnd = (p_curr_stat->counters.n_tcp_blocked_cwnd - p_prev_stat->counters.n_tcp_blocked_cwnd) / delay;
-	p_prev_stat->counters.n_tcp_blocked_rwnd = (p_curr_stat->counters.n_tcp_blocked_rwnd - p_prev_stat->counters.n_tcp_blocked_rwnd) / delay;
-	p_prev_stat->counters.n_tcp_updates_rtt = (p_curr_stat->counters.n_tcp_updates_rtt - p_prev_stat->counters.n_tcp_updates_rtt) / delay;
-	p_prev_stat->counters.n_tcp_rst = (p_curr_stat->counters.n_tcp_rst - p_prev_stat->counters.n_tcp_rst) / delay;
-*/
 #undef STAT_TCP_DELTA
 #undef STAT_COUNTERS_DELTA
 #undef STAT_DELTA
