@@ -426,6 +426,10 @@ tcp_write(struct tcp_pcb *pcb, const void *arg, u32_t len, u8_t is_dummy)
 #if LWIP_TSO
   int tot_p = 0;
 #endif /* LWIP_TSO */
+  unsigned long long tsc_start;
+  unsigned long long tsc_end;
+
+  EXTRA_STATS_TSC_START(tsc_start);
 
   int byte_queued = pcb->snd_nxt - pcb->lastack;
   if ( len < pcb->mss && !is_dummy)
@@ -438,6 +442,7 @@ tcp_write(struct tcp_pcb *pcb, const void *arg, u32_t len, u8_t is_dummy)
 
   err = tcp_write_checks(pcb, len);
   if (err != ERR_OK) {
+    EXTRA_STATS_TSC_END(tsc_start, tsc_end, pcb->p_stats->time_tcp_write);
     return err;
   }
   queuelen = pcb->snd_queuelen;
@@ -726,6 +731,8 @@ tcp_write(struct tcp_pcb *pcb, const void *arg, u32_t len, u8_t is_dummy)
   LWIP_DEBUGF(TCP_TSO_DEBUG | LWIP_DBG_TRACE,
               ("tcp_write:  mss: %-5d unsent %s\n", mss_local, _dump_seg(pcb->unsent)));
 
+  EXTRA_STATS_TSC_END(tsc_start, tsc_end, pcb->p_stats->time_tcp_write);
+
   return ERR_OK;
 memerr:
   pcb->flags |= TF_NAGLEMEMERR;
@@ -742,6 +749,7 @@ memerr:
       pcb->unsent != NULL);
   }
   LWIP_DEBUGF(TCP_QLEN_DEBUG | LWIP_DBG_STATE, ("tcp_write: %"S16_F" (with mem err)\n", pcb->snd_queuelen));
+  EXTRA_STATS_TSC_END(tsc_start, tsc_end, pcb->p_stats->time_tcp_write);
   return ERR_MEM;
 }
 
@@ -1404,6 +1412,8 @@ tcp_output(struct tcp_pcb *pcb)
 #if TCP_CWND_DEBUG
   s16_t i = 0;
 #endif /* TCP_CWND_DEBUG */
+  unsigned long long tsc_start;
+  unsigned long long tsc_end;
 
   /* First, check if we are invoked by the TCP input processing
      code. If so, we do not output anything. Instead, we rely on the
@@ -1412,6 +1422,8 @@ tcp_output(struct tcp_pcb *pcb)
   if (tcp_input_pcb == pcb) {
     return ERR_OK;
   }
+
+  EXTRA_STATS_TSC_START(tsc_start);
 
   wnd = LWIP_MIN(pcb->snd_wnd, pcb->cwnd);
 
@@ -1437,6 +1449,7 @@ tcp_output(struct tcp_pcb *pcb)
   if ((pcb->flags & TF_ACK_NOW) &&
     (seg == NULL ||
     seg->seqno - pcb->lastack + seg->len > wnd)) {
+    EXTRA_STATS_TSC_END(tsc_start, tsc_end, pcb->p_stats->time_tcp_out);
     return tcp_send_empty_ack(pcb);
   }
 
@@ -1619,6 +1632,8 @@ tcp_output(struct tcp_pcb *pcb)
 	  // Fetch pbuf for the next packet.
 	  pcb->pbuf_alloc = tcp_tx_pbuf_alloc(pcb, 0, PBUF_RAM);
   }
+
+  EXTRA_STATS_TSC_END(tsc_start, tsc_end, pcb->p_stats->time_tcp_out);
 
   return ERR_OK;
 }

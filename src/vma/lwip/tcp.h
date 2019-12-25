@@ -295,6 +295,7 @@ struct tcp_pcb {
 #define TF_WND_SCALE   ((u16_t)0x0100U) /* Window Scale option enabled */
 
 #ifdef DEFINED_EXTRA_STATS
+  unsigned long long tsc_up; /* tsc counter at pcb initialization */
   socket_tcp_stats_t *p_stats;
 #endif /* DEFINED_EXTRA_STATS */
 

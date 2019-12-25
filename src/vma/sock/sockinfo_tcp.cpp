@@ -676,7 +676,11 @@ unsigned sockinfo_tcp::tx_wait(int & err, bool is_blocking)
 {
 	unsigned sz = tcp_sndbuf(&m_pcb);
 	int poll_count = 0;
+	unsigned long long tsc_start;
+	unsigned long long tsc_end;
+
 	si_tcp_logfunc("sz = %d rx_count=%d", sz, m_n_rx_pkt_ready_list_count);
+	EXTRA_STATS_TSC_START(tsc_start);
 	err = 0;
 	while (is_rts() && (sz = tcp_sndbuf(&m_pcb)) == 0) {
 		err = rx_wait(poll_count, is_blocking);
@@ -684,10 +688,12 @@ unsigned sockinfo_tcp::tx_wait(int & err, bool is_blocking)
 		// progress engine may consume an arrived credit and it will not wakeup the
 		//transmit thread.
 		if (unlikely(err < 0)) {
+			EXTRA_STATS_TSC_END(tsc_start, tsc_end, m_pcb.p_stats->time_tx_wait);
 			return 0;
 		}
 		if (unlikely(g_b_exit)) {
 			errno = EINTR;
+			EXTRA_STATS_TSC_END(tsc_start, tsc_end, m_pcb.p_stats->time_tx_wait);
 			return 0;
 		}
 		if (is_blocking) {
@@ -698,6 +704,7 @@ unsigned sockinfo_tcp::tx_wait(int & err, bool is_blocking)
 			poll_count = 0;
 		}
 	}
+	EXTRA_STATS_TSC_END(tsc_start, tsc_end, m_pcb.p_stats->time_tx_wait);
 	si_tcp_logfunc("end sz=%d rx_count=%d", sz, m_n_rx_pkt_ready_list_count);
 	return sz;
 }
@@ -765,6 +772,8 @@ ssize_t sockinfo_tcp::tx(const tx_call_t call_type, const iovec* p_iov, const ss
 	int poll_count = 0;
 	bool is_dummy = IS_DUMMY_PACKET(flags);
 	bool block_this_run = BLOCK_THIS_RUN(m_b_blocking, flags);
+	unsigned long long tsc_start;
+	unsigned long long tsc_end;
 
 	/* Let allow OS to process all invalid scenarios to avoid any
 	 * inconsistencies in setting errno values
@@ -779,6 +788,7 @@ ssize_t sockinfo_tcp::tx(const tx_call_t call_type, const iovec* p_iov, const ss
 #ifdef VMA_TIME_MEASURE
 	TAKE_T_TX_START;
 #endif
+	EXTRA_STATS_TSC_START(tsc_start);
 
 retry_is_ready:
 
@@ -805,6 +815,7 @@ retry_is_ready:
 		INC_ERR_TX_COUNT;
 #endif
 
+		EXTRA_STATS_TSC_END(tsc_start, tsc_end, m_pcb.p_stats->time_tx);
 		return -1;
 	}
 	si_tcp_logfunc("tx: iov=%p niovs=%d dummy=%d", p_iov, sz_iov, is_dummy);
@@ -816,6 +827,7 @@ retry_is_ready:
 	lock_tcp_con();
 
 	if (unlikely(is_dummy) && !check_dummy_send_conditions(flags, p_iov, sz_iov)) {
+		EXTRA_STATS_TSC_END(tsc_start, tsc_end, m_pcb.p_stats->time_tx);
 		unlock_tcp_con();
 		errno = EAGAIN;
 		return -1;
@@ -823,6 +835,7 @@ retry_is_ready:
 
 #ifdef DEFINED_TCP_TX_WND_AVAILABILITY
 	if (!tcp_is_wnd_available(&m_pcb, p_iov[0].iov_len)) {
+		EXTRA_STATS_TSC_END(tsc_start, tsc_end, m_pcb.p_stats->time_tx);
 		unlock_tcp_con();
 		errno = EAGAIN;
 		return -1;
@@ -903,6 +916,7 @@ retry_write:
 						goto done;
 					}
 					errno = EPIPE;
+					EXTRA_STATS_TSC_END(tsc_start, tsc_end, m_pcb.p_stats->time_tx);
 					unlock_tcp_con();
 #ifdef VMA_TIME_MEASURE
 					INC_ERR_TX_COUNT;
@@ -951,6 +965,7 @@ done:
 		m_p_socket_stats->n_tx_ready_byte_count += total_tx;
 	}
 
+	EXTRA_STATS_TSC_END(tsc_start, tsc_end, m_pcb.p_stats->time_tx);
 	unlock_tcp_con();
 
 #ifdef VMA_TIME_MEASURE	
@@ -971,6 +986,7 @@ err:
 		m_p_socket_stats->counters.n_tx_drops++;
 	else
 		m_p_socket_stats->counters.n_tx_errors++;
+	EXTRA_STATS_TSC_END(tsc_start, tsc_end, m_pcb.p_stats->time_tx);
 	unlock_tcp_con();
 	return ret;
 
@@ -1907,6 +1923,8 @@ ssize_t sockinfo_tcp::rx(const rx_call_t call_type, iovec* p_iov, ssize_t sz_iov
 	int out_flags = 0;
 	int in_flags = *p_flags;
 	bool block_this_run = BLOCK_THIS_RUN(m_b_blocking, in_flags);
+	unsigned long long tsc_start;
+	unsigned long long tsc_end;
 
 	m_loops_timer.start();
 
@@ -1924,14 +1942,17 @@ ssize_t sockinfo_tcp::rx(const rx_call_t call_type, iovec* p_iov, ssize_t sz_iov
 #ifdef VMA_TIME_MEASURE
 	TAKE_T_RX_START;
 #endif
+	EXTRA_STATS_TSC_START(tsc_start);
 
 	if (unlikely((in_flags & MSG_WAITALL) && !(in_flags & MSG_PEEK))) {
 		total_iov_sz = 0;
 		for (int i = 0; i < sz_iov; i++) {
 			total_iov_sz += p_iov[i].iov_len;
 		}
-		if (total_iov_sz == 0)
+		if (total_iov_sz == 0) {
+			EXTRA_STATS_TSC_END(tsc_start, tsc_end, m_pcb.p_stats->time_rx);
 			return 0;
+		}
 	}
 
 	si_tcp_logfunc("rx: iov=%p niovs=%d", p_iov, sz_iov);
@@ -1942,6 +1963,7 @@ ssize_t sockinfo_tcp::rx(const rx_call_t call_type, iovec* p_iov, ssize_t sz_iov
 
 	while (m_rx_ready_byte_count < total_iov_sz) {
 		if (unlikely(g_b_exit ||!is_rtr() || (rx_wait_lockless(poll_count, block_this_run) < 0))) {
+			EXTRA_STATS_TSC_END(tsc_start, tsc_end, m_pcb.p_stats->time_rx);
 			return handle_rx_error(block_this_run);
 		}
 	}
@@ -1969,6 +1991,7 @@ ssize_t sockinfo_tcp::rx(const rx_call_t call_type, iovec* p_iov, ssize_t sz_iov
 		}
 	}
 
+	EXTRA_STATS_TSC_END(tsc_start, tsc_end, m_pcb.p_stats->time_rx);
 	unlock_tcp_con();
 
 	si_tcp_logfunc("rx completed, %d bytes sent", total_rx);
@@ -4009,10 +4032,13 @@ int sockinfo_tcp::rx_wait_helper(int &poll_count, bool is_blocking)
 	uint64_t poll_sn = 0;
 	rx_ring_map_t::iterator rx_ring_iter;
 	epoll_event rx_epfd_events[SI_RX_EPFD_EVENT_MAX];
+	unsigned long long tsc_start;
+	unsigned long long tsc_end;
 
 	// poll for completion
 	__log_info_func("");
 
+	EXTRA_STATS_TSC_START(tsc_start);
 
 	poll_count++;
 	n  = 0;
@@ -4042,16 +4068,19 @@ int sockinfo_tcp::rx_wait_helper(int &poll_count, bool is_blocking)
 
 		if (m_n_rx_pkt_ready_list_count)
 			m_p_socket_stats->counters.n_rx_poll_hit++;
+		EXTRA_STATS_TSC_END(tsc_start, tsc_end, m_pcb.p_stats->time_rx_wait);
 		return n;
 	}
 
 	// if in blocking accept state skip poll phase and go to sleep directly
         if (m_loops_timer.is_timeout() || !is_blocking) {
 		errno = EAGAIN;
+		EXTRA_STATS_TSC_END(tsc_start, tsc_end, m_pcb.p_stats->time_rx_wait);
 		return -1;
         }
 
 	if (poll_count < m_n_sysvar_rx_poll_num || m_n_sysvar_rx_poll_num == -1) {
+		EXTRA_STATS_TSC_END(tsc_start, tsc_end, m_pcb.p_stats->time_rx_wait);
 		return 0;
 	}
 
@@ -4060,6 +4089,7 @@ int sockinfo_tcp::rx_wait_helper(int &poll_count, bool is_blocking)
 	si_tcp_logfuncall("%d: too many polls without data blocking=%d", m_fd, is_blocking);
 	if (g_b_exit) {
 		errno = EINTR;
+		EXTRA_STATS_TSC_END(tsc_start, tsc_end, m_pcb.p_stats->time_rx_wait);
 		return -1;
 	}
 
@@ -4069,6 +4099,7 @@ int sockinfo_tcp::rx_wait_helper(int &poll_count, bool is_blocking)
 		ret = m_p_rx_ring->request_notification(CQT_RX, poll_sn);
 		if (ret !=  0) {
 			m_rx_ring_map_lock.unlock();
+			EXTRA_STATS_TSC_END(tsc_start, tsc_end, m_pcb.p_stats->time_rx_wait);
 			return 0;
 		}
 	}
@@ -4082,6 +4113,7 @@ int sockinfo_tcp::rx_wait_helper(int &poll_count, bool is_blocking)
 				ret = p_ring->request_notification(CQT_RX, poll_sn);
 				if (ret !=  0) {
 					m_rx_ring_map_lock.unlock();
+					EXTRA_STATS_TSC_END(tsc_start, tsc_end, m_pcb.p_stats->time_rx_wait);
 					return 0;
 				}
 			}
@@ -4101,6 +4133,7 @@ int sockinfo_tcp::rx_wait_helper(int &poll_count, bool is_blocking)
 	}
 	else
 	{
+		EXTRA_STATS_TSC_END(tsc_start, tsc_end, m_pcb.p_stats->time_rx_wait);
 		unlock_tcp_con();
 		return 0;
 	}
@@ -4110,6 +4143,7 @@ int sockinfo_tcp::rx_wait_helper(int &poll_count, bool is_blocking)
 
 	lock_tcp_con();
 	return_from_sleep();
+	EXTRA_STATS_TSC_END(tsc_start, tsc_end, m_pcb.p_stats->time_rx_wait);
 	unlock_tcp_con();
 
 	if (ret <= 0)

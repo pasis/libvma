@@ -143,14 +143,31 @@ struct socket_tcp_stats {
   u32_t n_unsent_q;
   u32_t n_unacked_q;
   u32_t n_ooseq_q;
+
+  /* time spent during activities (units: rdtsc ticks) */
+
+  unsigned long long time_up;        /* socket is up */
+  unsigned long long time_tx;        /* sockinfo_tcp::tx() */
+  unsigned long long time_rx;        /* sockinfo_tcp::rx() */
+  unsigned long long time_tx_wait;   /* sockinfo_tcp::tx_wait() */
+  unsigned long long time_rx_wait;   /* sockinfo_tcp::rx_wait() */
+  unsigned long long time_tcp_out;   /* tcp_output() */
+  unsigned long long time_tcp_rcv;   /* tcp_process() */
+  unsigned long long time_tcp_write; /* tcp_write() */
 };
 
 typedef struct socket_tcp_stats socket_tcp_stats_t;
 
+#include "utils/asm.h" /* gettimeoftsc */
+
 #define EXTRA_STATS_INC(x) ++x
+#define EXTRA_STATS_TSC_START(start) gettimeoftsc(&(start))
+#define EXTRA_STATS_TSC_END(start, end, store) do { gettimeoftsc(&(end)); (store) += (end) - (start); } while (0)
 
 #else /* DEFINED_EXTRA_STATS */
 #define EXTRA_STATS_INC(x) do {} while (0)
+#define EXTRA_STATS_TSC_START(start) do { (void)start; } while (0)
+#define EXTRA_STATS_TSC_END(start, end, store) do { (void)start; (void)end; } while (0)
 #endif /* DEFINED_EXTRA_STATS */
 
 #define PCB_STATS_INC(x) EXTRA_STATS_INC(pcb->p_stats->x)

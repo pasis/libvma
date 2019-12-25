@@ -118,6 +118,7 @@ static void copy_tcp_metrics(struct tcp_pcb *pcb)
 {
   struct tcp_seg *seg;
   socket_tcp_stats_t *stats = pcb->p_stats;
+  unsigned long long tsc;
   u32_t n;
 
   if (stats == NULL)
@@ -137,6 +138,9 @@ static void copy_tcp_metrics(struct tcp_pcb *pcb)
   stats->n_unacked_q = n;
   for (seg = pcb->ooseq, n = 0; seg != NULL; seg = seg->next, ++n);
   stats->n_ooseq_q = n;
+
+  gettimeoftsc(&tsc);
+  stats->time_up = tsc - pcb->tsc_up;
 }
 #else /* DEFINED_EXTRA_STATS */
 static void copy_tcp_metrics(struct tcp_pcb *pcb)
@@ -1116,6 +1120,8 @@ void tcp_pcb_init (struct tcp_pcb* pcb, u8_t prio)
 	pcb->enable_ts_opt = enable_ts_option;
 	pcb->seg_alloc = NULL;
 	pcb->pbuf_alloc = NULL;
+
+	EXTRA_STATS_TSC_START(pcb->tsc_up);
 }
 
 struct pbuf *

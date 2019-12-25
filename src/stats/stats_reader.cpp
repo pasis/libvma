@@ -173,7 +173,7 @@ void usage(const char *argv0)
 
 void update_delta_stat(socket_stats_t* p_curr_stat, socket_stats_t* p_prev_stat)
 {
-	int delay = INTERVAL;
+	unsigned delay = INTERVAL;
 
 #define STAT_DELTA(field) p_prev_stat->field = (p_curr_stat->field - p_prev_stat->field) / delay
 #define STAT_COUNTERS_DELTA(field) STAT_DELTA(counters.field)
@@ -247,6 +247,15 @@ void update_delta_stat(socket_stats_t* p_curr_stat, socket_stats_t* p_prev_stat)
 		p_prev_stat->tcp_stats.n_unsent_q = p_curr_stat->tcp_stats.n_unsent_q;
 		p_prev_stat->tcp_stats.n_unacked_q = p_curr_stat->tcp_stats.n_unacked_q;
 		p_prev_stat->tcp_stats.n_ooseq_q = p_curr_stat->tcp_stats.n_ooseq_q;
+
+		STAT_TCP_DELTA(time_up);
+		STAT_TCP_DELTA(time_tx);
+		STAT_TCP_DELTA(time_rx);
+		STAT_TCP_DELTA(time_tx_wait);
+		STAT_TCP_DELTA(time_rx_wait);
+		STAT_TCP_DELTA(time_tcp_out);
+		STAT_TCP_DELTA(time_tcp_rcv);
+		STAT_TCP_DELTA(time_tcp_write);
 	}
 #endif /* DEFINED_EXTRA_STATS */
 

@@ -494,6 +494,10 @@ tcp_process(struct tcp_pcb *pcb, tcp_in_data* in_data)
   struct tcp_seg *rseg;
   u8_t acceptable = 0;
   err_t err;
+  unsigned long long tsc_start;
+  unsigned long long tsc_end;
+
+  EXTRA_STATS_TSC_START(tsc_start);
 
   /* Process incoming RST segments. */
   if (in_data->flags & TCP_RST) {
@@ -514,12 +518,14 @@ tcp_process(struct tcp_pcb *pcb, tcp_in_data* in_data)
       LWIP_ASSERT("tcp_input: get_tcp_state(pcb) != CLOSED", get_tcp_state(pcb) != CLOSED);
       in_data->recv_flags |= TF_RESET;
       pcb->flags &= ~TF_ACK_DELAY;
+      EXTRA_STATS_TSC_END(tsc_start, tsc_end, pcb->p_stats->time_tcp_rcv);
       return ERR_RST;
     } else {
       LWIP_DEBUGF(TCP_INPUT_DEBUG, ("tcp_process: unacceptable reset seqno %"U32_F" rcv_nxt %"U32_F"\n",
        in_data->seqno, pcb->rcv_nxt));
       LWIP_DEBUGF(TCP_DEBUG, ("tcp_process: unacceptable reset seqno %"U32_F" rcv_nxt %"U32_F"\n",
        in_data->seqno, pcb->rcv_nxt));
+      EXTRA_STATS_TSC_END(tsc_start, tsc_end, pcb->p_stats->time_tcp_rcv);
       return ERR_OK;
     }
   }
@@ -527,6 +533,7 @@ tcp_process(struct tcp_pcb *pcb, tcp_in_data* in_data)
   if ((in_data->flags & TCP_SYN) && (get_tcp_state(pcb) != SYN_SENT && get_tcp_state(pcb) != SYN_RCVD)) {
     /* Cope with new connection attempt after remote end crashed */
     tcp_ack_now(pcb);
+    EXTRA_STATS_TSC_END(tsc_start, tsc_end, pcb->p_stats->time_tcp_rcv);
     return ERR_OK;
   }
   
@@ -589,6 +596,7 @@ tcp_process(struct tcp_pcb *pcb, tcp_in_data* in_data)
        * connected. */
       TCP_EVENT_CONNECTED(pcb, ERR_OK, err);
       if (err == ERR_ABRT) {
+        EXTRA_STATS_TSC_END(tsc_start, tsc_end, pcb->p_stats->time_tcp_rcv);
         return ERR_ABRT;
       }
       tcp_ack_now(pcb);
@@ -619,6 +627,7 @@ tcp_process(struct tcp_pcb *pcb, tcp_in_data* in_data)
           if (err != ERR_ABRT) {
             tcp_abort(pcb);
           }
+          EXTRA_STATS_TSC_END(tsc_start, tsc_end, pcb->p_stats->time_tcp_rcv);
           return ERR_ABRT;
         }
         old_cwnd = pcb->cwnd;
@@ -704,6 +713,7 @@ tcp_process(struct tcp_pcb *pcb, tcp_in_data* in_data)
   default:
     break;
   }
+  EXTRA_STATS_TSC_END(tsc_start, tsc_end, pcb->p_stats->time_tcp_rcv);
   return ERR_OK;
 }
 

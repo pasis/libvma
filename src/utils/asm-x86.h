@@ -34,6 +34,7 @@
 #ifndef ASMX86_H_
 #define ASMX86_H_
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <unistd.h>
 #include "utils/bullseye.h"

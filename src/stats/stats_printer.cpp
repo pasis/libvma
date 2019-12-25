@@ -230,6 +230,15 @@ void print_full_stats(socket_stats_t* p_si_stats, mc_grp_info_t* p_mc_grp_info, 
 		fprintf(filename, "TCP n_unsent_q: %u\n", p_si_stats->tcp_stats.n_unsent_q);
 		fprintf(filename, "TCP n_unacked_q: %u\n", p_si_stats->tcp_stats.n_unacked_q);
 		fprintf(filename, "TCP n_ooseq_q: %u\n", p_si_stats->tcp_stats.n_ooseq_q);
+		fprintf(filename, "TCP --------------------------------\n");
+		fprintf(filename, "TCP time_up: %llu\n", p_si_stats->tcp_stats.time_up);
+		fprintf(filename, "TCP time_tx: %llu\n", p_si_stats->tcp_stats.time_tx);
+		fprintf(filename, "TCP time_rx: %llu\n", p_si_stats->tcp_stats.time_rx);
+		fprintf(filename, "TCP time_tx_wait: %llu\n", p_si_stats->tcp_stats.time_tx_wait);
+		fprintf(filename, "TCP time_rx_wait: %llu\n", p_si_stats->tcp_stats.time_rx_wait);
+		fprintf(filename, "TCP time_tcp_out: %llu\n", p_si_stats->tcp_stats.time_tcp_out);
+		fprintf(filename, "TCP time_tcp_rcv: %llu\n", p_si_stats->tcp_stats.time_tcp_rcv);
+		fprintf(filename, "TCP time_tcp_write: %llu\n", p_si_stats->tcp_stats.time_tcp_write);
 	}
 #endif /* DEFINED_EXTRA_STATS */
 }
