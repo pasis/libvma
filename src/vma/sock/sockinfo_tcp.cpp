@@ -4717,6 +4717,7 @@ tcp_seg_pool::tcp_seg_pool(int size) {
 		m_tcp_segs_array[i].next = &m_tcp_segs_array[i + 1];
 	}
 	m_p_head = &m_tcp_segs_array[0];
+	g_global_stats.n_tcp_seg_pool_size = size;
 }
 
 tcp_seg_pool::~tcp_seg_pool() {
@@ -4746,6 +4747,7 @@ tcp_seg * tcp_seg_pool::get_tcp_segs(int amount) {
 	}
 	prev->next = NULL;
 	m_p_head = next;
+	g_global_stats.n_tcp_seg_pool_size -= amount;
 	unlock();
 	return head;
 }
@@ -4755,13 +4757,16 @@ void tcp_seg_pool::put_tcp_segs(tcp_seg * seg_list) {
 	if (unlikely(!seg_list))
 		return;
 
+	int i = 1;
 	while (next->next) {
 		next = next->next;
+		i++;
 	}
 
 	lock();
 	next->next = m_p_head;
 	m_p_head = seg_list;
+	g_global_stats.n_tcp_seg_pool_size += i;
 	unlock();
 }
 
